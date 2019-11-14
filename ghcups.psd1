@@ -69,7 +69,7 @@ RequiredModules = @('powershell-yaml')
 NestedModules = @('ghcups.psm1')
 
 # このモジュールからエクスポートする関数です。最適なパフォーマンスを得るには、ワイルドカードを使用せず、エクスポートする関数がない場合は、エントリを削除しないで空の配列を使用してください。
-FunctionsToExport = @('Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal', 'Get-Config')
+FunctionsToExport = @('Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Show-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal', 'Show-Cabal', 'Write-GhcupsConfigTemplate')
 
 # このモジュールからエクスポートするコマンドレットです。最適なパフォーマンスを得るには、ワイルドカードを使用せず、エクスポートするコマンドレットがない場合は、エントリを削除しないで空の配列を使用してください。
 CmdletsToExport = @()
