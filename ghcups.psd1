@@ -21,13 +21,13 @@ ModuleVersion = '1.0'
 GUID = 'e5cd2573-d723-4600-abdb-e552c9d401d4'
 
 # このモジュールの作成者
-Author = '岡本和樹'
+Author = 'Kazuki Okamoto (岡本和樹)'
 
 # このモジュールの会社またはベンダー
-CompanyName = ''
+CompanyName = 'IIJ Innovation Institute Inc.'
 
 # このモジュールの著作権情報
-Copyright = '(c) 2019 岡本和樹. All rights reserved.'
+Copyright = '2019 IIJ Innovation Institute Inc.'
 
 # このモジュールの機能の説明
 # Description = ''

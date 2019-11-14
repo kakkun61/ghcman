@@ -9,7 +9,7 @@ Set-Variable configFileName -Option Constant -Value 'ghcups.yaml'
 
 # Common
 
-function Find-Config () {
+Function Find-Config () {
     Param (
         [Parameter(Mandatory)][String] $Dir
     )
@@ -63,13 +63,11 @@ Function Set-PathEnv() {
         [Parameter(Mandatory)][String[]] $patterns,
         [Parameter(Mandatory)][AllowEmptyString()][String] $path
     )
-    Write-Debug "patterns: $patterns"
 
     If (-not [String]::IsNullOrEmpty($path) -and -not (Test-Path $path)) {
         Write-Warning "`"$path`" is not an existing path"
     }
     $restPaths = $Env:Path -Split ';' | Where-Object { $v = $_; $patterns | ForEach-Object { $v -NotMatch $_ } | All }
-    Write-Debug "rest: $restPaths"
     $newPaths = ,$path + $restPaths | Where-Object { -not [String]::IsNullOrEmpty($_) }
     Set-Item Env:\Path -Value ($newPaths -Join ';')
 }
@@ -83,6 +81,8 @@ Function Get-InstalledChocoItems() {
     Get-Item "$path*" | ForEach-Object { ([String]$_).Remove(0, "$path".Length) }
 }
 
+# .SYNOPSIS
+#   Creats the ghcups.yaml with the default contents.
 function Write-GhcupsConfigTemplate () {
     Param (
         [String] $Path = '.'
@@ -117,6 +117,8 @@ Function Get-ChocoGhc() {
     "$Env:ChocolateyInstall\lib\ghc.$Ghc\tools\ghc-$Ghc\bin"
 }
 
+# .SYNOPSIS
+#   Sets the version or variant of GHC to the Path environment variable of the current session.
 Function Set-Ghc() {
     Param (
         [Parameter(Mandatory)][String] $Ghc
@@ -133,10 +135,14 @@ Function Set-Ghc() {
     Set-PathEnv (Get-GhcPatterns $config) $ghcDir
 }
 
+# .SYNOPSIS
+#   Removes all GHC values from the Path environment variable of the current session.
 Function Clear-Ghc() {
     Set-PathEnv (Get-GhcPatterns (Get-Config (Find-Config (Get-Location)))) $null
 }
 
+# .SYNOPSIS
+#   Installs the specified GHC with the Chocolatey.
 Function Install-Ghc() {
     Param (
         [Parameter(Mandatory)][String] $Ghc,
@@ -150,6 +156,8 @@ Function Install-Ghc() {
     }
 }
 
+# .SYNOPSIS
+#   Uninstalls the specified GHC with the Chocolatey.
 Function Remove-Ghc() {
     Param (
         [Parameter(Mandatory)][String] $Ghc
@@ -158,6 +166,8 @@ Function Remove-Ghc() {
     choco uninstall ghc --version $Ghc
 }
 
+# .SYNOPSIS
+#   Shows the GHCs which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
 Function Show-Ghc() {
     $configPath = Find-Config (Get-Location)
     $config = Get-Config $configPath
@@ -212,6 +222,8 @@ Function Get-ChocoCabal() {
     "$Env:ChocolateyInstall\lib\cabal.$Cabal\tools\cabal-$Cabal"
 }
 
+# .SYNOPSIS
+#   Sets the version or variant of Cabal to the Path environment variable of the current session.pa
 Function Set-Cabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal
@@ -228,10 +240,14 @@ Function Set-Cabal() {
     Set-PathEnv (Get-CabalPatterns $config) $cabalDir
 }
 
+# .SYNOPSIS
+#   Removes all Cabal values from the Path environment variable of the current session.
 Function Clear-Cabal() {
     Set-PathEnv (Get-CabalPatterns (Get-Config (Get-Location))) $null
 }
 
+# .SYNOPSIS
+#   Installs the specified Cabal with the Chocolatey.
 Function Install-Cabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal,
@@ -245,6 +261,8 @@ Function Install-Cabal() {
     }
 }
 
+# .SYNOPSIS
+#   Uninstalls the specified Cabal with the Chocolatey.
 Function Remove-Cabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal
@@ -253,6 +271,8 @@ Function Remove-Cabal() {
     choco uninstall cabal --version $Cabal
 }
 
+# .SYNOPSIS
+#   Shows the Cabals which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
 Function Show-Cabal() {
     $configPath = Find-Config (Get-Location)
     $config = Get-Config $configPath
