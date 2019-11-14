@@ -1,4 +1,6 @@
 $bridgeDir = "$Env:ProgramData\ghcups"
+$ghcPathRegex = [Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin'
+$cabalPathRegex = [Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'
 
 Function Get-ChocoGhc() {
     Param (
@@ -48,10 +50,18 @@ Function Set-GhcBridge() {
     }
 }
 
+Function Set-GhcEnv() {
+    Param (
+        [Parameter(Mandatory)][string]$Ghc
+    )
+
+    Set-Item Env:\Path -Value ((,(Get-ChocoGhc $Ghc) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $ghcPathRegex })) -Join ';')
+}
+
 Function Set-Ghc() {
     Param (
         [Parameter(Mandatory)][string]$Ghc,
-        [ValidateSet('alias', 'bridge')]$Method = 'alias'
+        [ValidateSet('alias', 'bridge', 'env')]$Method = 'alias'
     )
 
     Switch ($Method) {
@@ -61,12 +71,15 @@ Function Set-Ghc() {
         'bridge' {
             Set-GhcBridge -Ghc $Ghc
         }
+        'env' {
+            Set-GhcEnv -Ghc $Ghc
+        }
     }
 }
 
 Function Clear-Ghc() {
     Param (
-        [ValidateSet('alias', 'bridge')]$Method = 'alias'
+        [ValidateSet('alias', 'bridge', 'env')]$Method = 'alias'
     )
 
     Switch ($method) {
@@ -91,6 +104,9 @@ Function Clear-Ghc() {
             Remove-Item "$bridgeDir\hsc2hs.ps1"
             Remove-Item "$bridgeDir\runghc.ps1"
             Remove-Item "$bridgeDir\runhaskell.ps1"
+        }
+        'env' {
+            Set-Item Env:\Path -Value (((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $ghcPathRegex }) -Join ';')
         }
     }
 }
@@ -122,7 +138,7 @@ Function Get-ChocoCabal() {
         [Parameter(Mandatory)][string]$Cabal
     )
 
-    "$Env:ChocolateyInstall\lib\cabal.$Cabal\tools\cabal-$Cabal\cabal.exe"
+    "$Env:ChocolateyInstall\lib\cabal.$Cabal\tools\cabal-$Cabal"
 }
 
 Function Set-CabalAlias() {
@@ -130,7 +146,7 @@ Function Set-CabalAlias() {
         [Parameter(Mandatory)][string]$Cabal
     )
 
-    Set-Alias -Scope Global cabal (Get-ChocoCabal $Cabal)
+    Set-Alias -Scope Global cabal "$(Get-ChocoCabal $Cabal)\cabal.exe"
 }
 
 Function Set-CabalBridge() {
@@ -142,17 +158,24 @@ Function Set-CabalBridge() {
         New-Item -ItemType Directory -Path "$bridgeDir" | Out-Null
     }
 
-    Out-File -InputObject "$(Get-ChocoCabal $Cabal) @Args" -FilePath "$bridgeDir\cabal.ps1"
+    Out-File -InputObject "$(Get-ChocoCabal $Cabal)\cabal.exe @Args" -FilePath "$bridgeDir\cabal.ps1"
 
     If (-not ("$Env:PATH" -Match [regex]::escape("$bridgeDir"))) {
         Write-Host "Add `"$bridgeDir`" to the PATH enviroment variable"
     }
+
+Function Set-CabalEnv() {
+    Param (
+        [Parameter(Mandatory)][string]$Cabal
+    )
+
+    Set-Item Env:\Path -Value ((,(Get-ChocoCabal $Cabal) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $cabalPathRegex })) -Join ';')
 }
 
 Function Set-Cabal() {
     Param (
         [Parameter(Mandatory)][string]$Cabal,
-        [ValidateSet('alias', 'bridge')]$Method = 'alias'
+        [ValidateSet('alias', 'bridge', 'env')]$Method = 'alias'
     )
 
     Switch ($Method) {
@@ -162,12 +185,15 @@ Function Set-Cabal() {
         'bridge' {
             Set-CabalBridge -Cabal $Cabal
         }
+        'env' {
+            Set-CabalEnv -Cabal $Cabal
+        }
     }
 }
 
 Function Clear-Cabal() {
     Param (
-        [ValidateSet('alias', 'bridge')]$Method = 'alias'
+        [ValidateSet('alias', 'bridge', 'env')]$Method = 'alias'
     )
 
     Switch ($method) {
@@ -176,6 +202,9 @@ Function Clear-Cabal() {
         }
         'bridge' {
             Remove-Item "$bridgeDir\cabal.ps1"
+        }
+        'env' {
+            Set-Item Env:\Path -Value (((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $cabalPathRegex }) -Join ';')
         }
     }
 }
