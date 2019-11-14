@@ -4,7 +4,7 @@ Set-Variable cabalPathRegex -Option Constant -Value ([Regex]::Escape($Env:Chocol
 
 Function Get-ChocoGhc() {
     Param (
-        [Parameter(Mandatory)][String]$Ghc
+        [Parameter(Mandatory)][String] $Ghc
     )
 
     "$Env:ChocolateyInstall\lib\ghc.$Ghc\tools\ghc-$Ghc\bin"
@@ -12,7 +12,7 @@ Function Get-ChocoGhc() {
 
 Function Set-Ghc() {
     Param (
-        [Parameter(Mandatory)][String]$Ghc
+        [Parameter(Mandatory)][String] $Ghc
     )
 
     Set-Item Env:\Path -Value ((,(Get-ChocoGhc $Ghc) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $ghcPathRegex })) -Join ';')
@@ -24,8 +24,8 @@ Function Clear-Ghc() {
 
 Function Install-Ghc() {
     Param (
-        [Parameter(Mandatory)][String]$Ghc,
-        [Switch]$Set = $false
+        [Parameter(Mandatory)][String] $Ghc,
+        [Switch] $Set = $false
     )
 
     choco install ghc --version $Ghc --side-by-side
@@ -37,7 +37,7 @@ Function Install-Ghc() {
 
 Function Remove-Ghc() {
     Param (
-        [Parameter(Mandatory)][String]$Ghc
+        [Parameter(Mandatory)][String] $Ghc
     )
 
     choco uninstall ghc --version $Ghc
@@ -45,7 +45,7 @@ Function Remove-Ghc() {
 
 Function Get-ChocoCabal() {
     Param (
-        [Parameter(Mandatory)][String]$Cabal
+        [Parameter(Mandatory)][String] $Cabal
     )
 
     "$Env:ChocolateyInstall\lib\cabal.$Cabal\tools\cabal-$Cabal"
@@ -53,7 +53,7 @@ Function Get-ChocoCabal() {
 
 Function Set-Cabal() {
     Param (
-        [Parameter(Mandatory)][String]$Cabal
+        [Parameter(Mandatory)][String] $Cabal
     )
 
     Set-Item Env:\Path -Value ((,(Get-ChocoCabal $Cabal) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $cabalPathRegex })) -Join ';')
@@ -65,8 +65,8 @@ Function Clear-Cabal() {
 
 Function Install-Cabal() {
     Param (
-        [Parameter(Mandatory)][String]$Cabal,
-        [Switch]$Set = $false
+        [Parameter(Mandatory)][String] $Cabal,
+        [Switch] $Set = $false
     )
 
     choco install cabal --version $Cabal --side-by-side
@@ -78,7 +78,7 @@ Function Install-Cabal() {
 
 Function Remove-Cabal() {
     Param (
-        [Parameter(Mandatory)][String]$Cabal
+        [Parameter(Mandatory)][String] $Cabal
     )
 
     choco uninstall cabal --version $Cabal
