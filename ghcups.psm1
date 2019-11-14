@@ -4,7 +4,7 @@ $cabalPathRegex = [Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+
 
 Function Get-ChocoGhc() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc
+        [Parameter(Mandatory)][String]$Ghc
     )
 
     "$Env:ChocolateyInstall\lib\ghc.$Ghc\tools\ghc-$Ghc\bin"
@@ -12,7 +12,7 @@ Function Get-ChocoGhc() {
 
 Function Set-GhcAlias() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc
+        [Parameter(Mandatory)][String]$Ghc
     )
 
     Set-Alias -Scope Global ghc "$(Get-ChocoGhc $Ghc)\ghc.exe"
@@ -28,7 +28,7 @@ Function Set-GhcAlias() {
 
 Function Set-GhcBridge() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc
+        [Parameter(Mandatory)][String]$Ghc
     )
 
     If (-not (Test-Path "$bridgeDir")) {
@@ -45,14 +45,14 @@ Function Set-GhcBridge() {
     Out-File -InputObject "$(Get-ChocoGhc $Ghc)\runghc.exe @Args" -FilePath "$bridgeDir\runghc.ps1"
     Out-File -InputObject "$(Get-ChocoGhc $Ghc)\runhaskell.exe @Args" -FilePath "$bridgeDir\runhaskell.ps1"
 
-    If (-not ("$Env:PATH" -Match [regex]::escape("$bridgeDir"))) {
-        Write-Host "Add `"$bridgeDir`" to the PATH enviroment variable"
+    If (-not ($Env:Path -Match [Regex]::escape("$bridgeDir"))) {
+        Write-Host "Add `"$bridgeDir`" to the Path enviroment variable"
     }
 }
 
 Function Set-GhcEnv() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc
+        [Parameter(Mandatory)][String]$Ghc
     )
 
     Set-Item Env:\Path -Value ((,(Get-ChocoGhc $Ghc) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $ghcPathRegex })) -Join ';')
@@ -60,7 +60,7 @@ Function Set-GhcEnv() {
 
 Function Set-Ghc() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc,
+        [Parameter(Mandatory)][String]$Ghc,
         [ValidateSet('alias', 'bridge', 'env')]$Method = 'alias'
     )
 
@@ -113,7 +113,7 @@ Function Clear-Ghc() {
 
 Function Install-Ghc() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc,
+        [Parameter(Mandatory)][String]$Ghc,
         [Switch]$Set = $false,
         [ValidateSet('alias', 'bridge')]$Method = 'alias'
     )
@@ -127,7 +127,7 @@ Function Install-Ghc() {
 
 Function Remove-Ghc() {
     Param (
-        [Parameter(Mandatory)][string]$Ghc
+        [Parameter(Mandatory)][String]$Ghc
     )
 
     choco uninstall ghc --version $Ghc
@@ -135,7 +135,7 @@ Function Remove-Ghc() {
 
 Function Get-ChocoCabal() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal
+        [Parameter(Mandatory)][String]$Cabal
     )
 
     "$Env:ChocolateyInstall\lib\cabal.$Cabal\tools\cabal-$Cabal"
@@ -143,7 +143,7 @@ Function Get-ChocoCabal() {
 
 Function Set-CabalAlias() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal
+        [Parameter(Mandatory)][String]$Cabal
     )
 
     Set-Alias -Scope Global cabal "$(Get-ChocoCabal $Cabal)\cabal.exe"
@@ -151,22 +151,23 @@ Function Set-CabalAlias() {
 
 Function Set-CabalBridge() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal
+        [Parameter(Mandatory)][String]$Cabal
     )
 
-    If (-not (Test-Path "$bridgeDir")) {
-        New-Item -ItemType Directory -Path "$bridgeDir" | Out-Null
+    If (-not (Test-Path $bridgeDir)) {
+        New-Item -ItemType Directory -Path $bridgeDir | Out-Null
     }
 
     Out-File -InputObject "$(Get-ChocoCabal $Cabal)\cabal.exe @Args" -FilePath "$bridgeDir\cabal.ps1"
 
-    If (-not ("$Env:PATH" -Match [regex]::escape("$bridgeDir"))) {
-        Write-Host "Add `"$bridgeDir`" to the PATH enviroment variable"
+    If (-not ($Env:Path -Match [regex]::escape($bridgeDir))) {
+        Write-Host "Add `"$bridgeDir`" to the Path enviroment variable"
     }
+}
 
 Function Set-CabalEnv() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal
+        [Parameter(Mandatory)][String]$Cabal
     )
 
     Set-Item Env:\Path -Value ((,(Get-ChocoCabal $Cabal) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $cabalPathRegex })) -Join ';')
@@ -174,7 +175,7 @@ Function Set-CabalEnv() {
 
 Function Set-Cabal() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal,
+        [Parameter(Mandatory)][String]$Cabal,
         [ValidateSet('alias', 'bridge', 'env')]$Method = 'alias'
     )
 
@@ -211,7 +212,7 @@ Function Clear-Cabal() {
 
 Function Install-Cabal() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal,
+        [Parameter(Mandatory)][String]$Cabal,
         [Switch]$Set = $false,
         [ValidateSet('alias', 'bridge')]$Method = 'alias'
     )
@@ -225,7 +226,7 @@ Function Install-Cabal() {
 
 Function Remove-Cabal() {
     Param (
-        [Parameter(Mandatory)][string]$Cabal
+        [Parameter(Mandatory)][String]$Cabal
     )
 
     choco uninstall cabal --version $Cabal
