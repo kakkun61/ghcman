@@ -102,7 +102,7 @@ Function Get-GhcPatterns() {
     If ($null -ne $Config -and $null -ne $Config['ghc']) {
         ForEach ($path in $Config.ghc.Values) {
             If (-not [String]::IsNullOrEmpty($path)) {
-                $patterns += [Regex]::Escape($path)
+                $patterns += '\A' + [Regex]::Escape($path) + '\Z'
             }
         }
     }

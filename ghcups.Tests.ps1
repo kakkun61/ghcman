@@ -3,7 +3,7 @@
 Set-StrictMode -Version Latest
 
 Import-Module powershell-yaml
-Import-Module (Join-Path "$PSScriptRoot" 'ghcups.psm1')
+Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
 
 Describe "Set-Ghc" {
     It "Add 8.8.1 to the empty path" {
