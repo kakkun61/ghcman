@@ -5,6 +5,8 @@ Set-StrictMode -Version Latest
 Import-Module powershell-yaml
 Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
 
+Set-Variable originalPath -Option Constant -Value "$Env:Path"
+
 Describe "Set-Ghc" {
     It "Add 8.8.1 to the empty path" {
         $Env:Path = ''
@@ -48,5 +50,9 @@ Describe "Set-Ghc" {
 
     AfterEach {
         Remove-Item 'ghcups.yaml' -ErrorAction Ignore
+    }
+
+    AfterAll {
+        Set-Item Env:\Path -Value "$originalPath"
     }
 }

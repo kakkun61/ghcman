@@ -1,0 +1,26 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install powershell-yaml
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module powershell-yaml -Force
+    - name: Install Pester
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module Pester -Force -SkipPublisherCheck
+    - name: Test
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module Pester
+        Invoke-Pester -EnableExit
