@@ -1,7 +1,11 @@
+# Constant
+
 Set-Variable dataDir -Option Constant -Value "$Env:ProgramData\ghcups"
 Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin')
 Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
 Set-Variable configFileName -Option Constant -Value 'ghcups.yaml'
+
+# Common
 
 Function Get-Config() {
     Param (
@@ -53,6 +57,8 @@ Function Set-PathEnv() {
     $newPaths = ,$path + $restPaths | Where-Object { '' -ne $_ }
     Set-Item Env:\Path -Value ($newPaths -Join ';')
 }
+
+# GHC
 
 Function Get-GhcPatterns() {
     Param (
@@ -117,6 +123,8 @@ Function Remove-Ghc() {
     choco uninstall ghc --version $Ghc
 }
 
+# Cabal
+
 Function Get-CabalPatterns() {
     Param (
         [Parameter(Mandatory)][Hashtable] $Config
@@ -179,5 +187,7 @@ Function Remove-Cabal() {
 
     choco uninstall cabal --version $Cabal
 }
+
+# Export
 
 Export-ModuleMember -Function 'Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal', 'Get-Config'
