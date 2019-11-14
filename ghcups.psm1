@@ -1,6 +1,72 @@
-Set-Variable bridgeDir -Option Constant -Value "$Env:ProgramData\ghcups"
-Set-Variable ghcPathRegex -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin')
-Set-Variable cabalPathRegex -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+Set-Variable dataDir -Option Constant -Value "$Env:ProgramData\ghcups"
+Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin')
+Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+Set-Variable configFileName -Option Constant -Value 'ghcups.yaml'
+
+Function Get-Config() {
+    Param (
+        [Parameter(Mandatory)][String] $Dir
+    )
+
+    $configPath = ''
+    While ($true) {
+        If ($Dir -eq $Env:USERPROFILE -or '' -eq $Dir) {
+            break
+        }
+        $test = Join-Path $Dir $configFileName
+        If (Test-Path $test) {
+            $configPath = $test
+            break
+        }
+        $Dir = Split-Path $Dir -Parent
+    }
+    If ('' -eq $configPath) {
+        $test = Join-Path $dataDir $configFileName
+        If (Test-Path $test) {
+            $configPath = $test
+        }
+        Else {
+            $null
+            return
+        }
+    }
+    ConvertFrom-Yaml (Get-Content $configPath -Raw)
+}
+
+Function All() {
+    Param ([Parameter(ValueFromPipeline)][Boolean[]] $ps)
+    Begin { $acc = $true }
+    Process { ForEach ($p in $ps) { $acc = $acc -and $p } }
+    End { $acc }
+}
+
+Function Set-PathEnv() {
+    Param (
+        [Parameter(Mandatory)][String[]] $patterns,
+        [Parameter(Mandatory)][AllowEmptyString()][String] $path
+    )
+
+    If ('' -ne $path -and -not (Test-Path $path)) {
+        Write-Warning "`"$path`" is not an existing path"
+    }
+    $restPaths = $Env:Path -Split ';' | Where-Object { $v = $_; $patterns | ForEach-Object { $v -NotMatch $_ } | All }
+    $newPaths = ,$path + $restPaths | Where-Object { '' -ne $_ }
+    Set-Item Env:\Path -Value ($newPaths -Join ';')
+}
+
+Function Get-GhcPatterns() {
+    Param (
+        [Parameter(Mandatory)][Hashtable] $Config
+    )
+
+    $patterns = ,$ghcPathPattern
+    If ($null -ne $Config -and $null -ne $Config['ghc']) {
+        ForEach ($path in $Config.ghc.Values) {
+            $patterns += [Regex]::Escape($path)
+        }
+    }
+    $patterns
+}
 
 Function Get-ChocoGhc() {
     Param (
@@ -15,11 +81,19 @@ Function Set-Ghc() {
         [Parameter(Mandatory)][String] $Ghc
     )
 
-    Set-Item Env:\Path -Value ((,(Get-ChocoGhc $Ghc) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $ghcPathRegex })) -Join ';')
+    $config = Get-Config (Get-Location)
+    $ghcDir = ''
+    If ($null -eq $config -or $null -eq $config['ghc'] -or $null -eq $config['ghc'][$Ghc]) {
+        $ghcDir = Get-ChocoGhc $Ghc
+    }
+    Else {
+        $ghcDir = $config['ghc'][$Ghc]
+    }
+    Set-PathEnv (Get-GhcPatterns $config) $ghcDir
 }
 
 Function Clear-Ghc() {
-    Set-Item Env:\Path -Value (((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $ghcPathRegex }) -Join ';')
+    Set-PathEnv (Get-GhcPatterns (Get-Config (Get-Location))) $null
 }
 
 Function Install-Ghc() {
@@ -43,6 +117,20 @@ Function Remove-Ghc() {
     choco uninstall ghc --version $Ghc
 }
 
+Function Get-CabalPatterns() {
+    Param (
+        [Parameter(Mandatory)][Hashtable] $Config
+    )
+
+    $patterns = ,$cabalPathPattern
+    If ($null -ne $Config -and $null -ne $Config['cabal']) {
+        ForEach ($path in $Config.cabal.Values) {
+            $patterns += [Regex]::Escape($path)
+        }
+    }
+    $patterns
+}
+
 Function Get-ChocoCabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal
@@ -56,11 +144,19 @@ Function Set-Cabal() {
         [Parameter(Mandatory)][String] $Cabal
     )
 
-    Set-Item Env:\Path -Value ((,(Get-ChocoCabal $Cabal) + ((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $cabalPathRegex })) -Join ';')
+    $config = Get-Config (Get-Location)
+    $cabalDir = ''
+    If ($null -eq $config -or $null -eq $config['cabal'] -or $null -eq $config['cabal'][$Cabal]) {
+        $cabalDir = Get-ChocoCabal $Cabal
+    }
+    Else {
+        $cabalDir = $config['cabal'][$Cabal]
+    }
+    Set-PathEnv (Get-CabalPatterns $config) $cabalDir
 }
 
 Function Clear-Cabal() {
-    Set-Item Env:\Path -Value (((Get-ChildItem Env:\Path).Value -Split ';' | Where-Object { $_ -NotMatch $cabalPathRegex }) -Join ';')
+    Set-PathEnv (Get-CabalPatterns (Get-Config (Get-Location))) $null
 }
 
 Function Install-Cabal() {
@@ -84,4 +180,4 @@ Function Remove-Cabal() {
     choco uninstall cabal --version $Cabal
 }
 
-Export-ModuleMember -Function 'Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal'
+Export-ModuleMember -Function 'Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal', 'Get-Config'
