@@ -1,5 +1,7 @@
 # ghcups; ghcup for PowerShell
 
+[![GitHub Actions: windows](https://github.com/kakkun61/ghcups/workflows/windows/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Awindows)
+
 ## Install
 
 ### Dependencies
