@@ -1,0 +1,48 @@
+name: windows
+
+on: [push, pull_request]
+
+jobs:
+  test-powershell:
+    name: Test on PowerShell on Windows
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install powershell-yaml
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module powershell-yaml -Force
+    - name: Install Pester
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module Pester -Force -SkipPublisherCheck
+    - name: Test
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module Pester
+        Invoke-Pester -EnableExit
+
+  test-pwsh:
+    name: Test on PowerShell Core on Windows
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install powershell-yaml
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module powershell-yaml -Force
+    - name: Install Pester
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module Pester -Force -SkipPublisherCheck
+    - name: Test
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module Pester
+        Invoke-Pester -EnableExit
