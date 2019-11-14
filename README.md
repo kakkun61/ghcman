@@ -64,7 +64,7 @@ Copy _ghcups_ folder under `Env:\PSModulePath` folder like _`$Env:USERPROFILE`\D
 
 _ghcups.yaml_ is the configuration file. ghcups searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_. The global configuration file is placed in _`$Env:ProgramData`\ghcups_.
 
-This is a sample _ghcups.yaml_.
+This is a sample of _ghcups.yaml_.
 
 ```yaml
 ghc:
@@ -75,7 +75,7 @@ cabal:
   HEAD: somewhere\directory\which\contains\cabal
 ```
 
-`Write-GhcupsConfigTemplate` commandlet creates _ghcups.yaml_ with the template.
+`Write-GhcupsConfigTemplate` function creates _ghcups.yaml_ with the template.
 
 ## Functions
 
