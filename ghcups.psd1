@@ -12,7 +12,7 @@
 RootModule = 'ghcups.psm1'
 
 # このモジュールのバージョン番号です。
-ModuleVersion = '1.0'
+ModuleVersion = '1.0.1'
 
 # サポートされている PSEditions
 # CompatiblePSEditions = @()
@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = @('Haskell', 'GHC', 'PSEdition_Desktop', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/1.0/LICENSE'
+        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/1.0.1/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
         ProjectUri = 'https://github.com/kakkun61/ghcups'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/1.0/ChangeLog.md'
+        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/1.0.1/ChangeLog.md'
 
     } # PSData ハッシュテーブル終了
 
