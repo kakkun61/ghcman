@@ -30,7 +30,7 @@ CompanyName = 'IIJ Innovation Institute Inc.'
 Copyright = '2019 IIJ Innovation Institute Inc.'
 
 # このモジュールの機能の説明
-# Description = ''
+Description = 'Switch GHC and Cabal quickly'
 
 # このモジュールに必要な Windows PowerShell エンジンの最小バージョン
 PowerShellVersion = '3.0'

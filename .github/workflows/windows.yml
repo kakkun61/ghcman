@@ -46,3 +46,20 @@ jobs:
         $ErrorActionPreference = 'Stop'
         Import-Module Pester
         Invoke-Pester -EnableExit
+
+  lint:
+    name: Lint by PSScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install PSScriptAnalyzer
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module PSScriptAnalyzer -Force
+    - name: Test
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module PSScriptAnalyzer
+        Invoke-ScriptAnalyzer . -Recurse -Severity Information -EnableExit
