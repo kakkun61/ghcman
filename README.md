@@ -1,24 +1,13 @@
 # ghcups; ghcup for PowerShell
 
-[![GitHub Actions: windows](https://github.com/kakkun61/ghcups/workflows/windows/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Awindows)
+[![GitHub Actions: windows](https://github.com/kakkun61/ghcups/workflows/windows/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Awindows) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcups.svg)](https://www.powershellgallery.com/packages/ghcups/)
 
 ## Install
 
-### Dependencies
-
-Install dependencies on the administrative PowerShell.
+Download and load ghcups to PowerShell.
 
 ```
-> iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-> Install-Module powershell-yaml
-```
-
-### ghcups
-
-Download and load this to PowerShell.
-
-```
-> git clone git@github.com:kakkun61/ghcups.git
+> Install-Module ghcups
 > Import-Module ghcups
 ```
 
