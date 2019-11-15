@@ -76,10 +76,8 @@ Describe "Set-Ghc" {
     }
 
     AfterAll {
-        Write-Debug 'AfterAll'
         Remove-Item $Env:ProgramData -Recurse -ErrorAction Ignore
         Set-Location $originalPWD
-        Write-Debug "Set-Location $originalPWD"
         Remove-Item $tempPWD -Recurse
         Set-Item Env:\Path -Value "$originalPath"
         Set-Item Env:\ProgramData -Value "$originalProgramData"

@@ -6,37 +6,27 @@ Set-Variable dataDir -Option Constant -Value "$Env:ProgramData\ghcups"
 Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin')
 Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
 Set-Variable configFileName -Option Constant -Value 'ghcups.yaml'
+Set-Variable globalConfigPath -Option Constant -Value "$dataDir\$configFileName"
 
 # Common
 
-Function Find-Config () {
+Function Find-LocalConfigPath() {
     Param (
         [Parameter(Mandatory)][String] $Dir
     )
 
-    $configPath = ''
     While ($true) {
         If ($Dir -eq $Env:USERPROFILE -or [String]::IsNullOrEmpty($Dir)) {
-            break
-        }
-        $test = Join-Path $Dir $configFileName
-        If (Test-Path $test) {
-            $configPath = $test
-            break
-        }
-        $Dir = Split-Path $Dir -Parent
-    }
-    If ([String]::IsNullOrEmpty($configPath)) {
-        $test = Join-Path $dataDir $configFileName
-        If (Test-Path $test) {
-            $configPath = $test
-        }
-        Else {
             ''
             return
         }
+        $test = Join-Path $Dir $configFileName
+        If (Test-Path $test) {
+            $test
+            return
+        }
+        $Dir = Split-Path $Dir -Parent
     }
-    $configPath
 }
 
 Function Get-Config() {
@@ -48,7 +38,67 @@ Function Get-Config() {
         $null
         return
     }
+    If (-not (Test-Path $Path)) {
+        $null
+        return
+    }
     ConvertFrom-Yaml (Get-Content $Path -Raw)
+}
+
+Function Get-ConfigItem() {
+    Param (
+        [Parameter(Mandatory)][Object[]] $Name,
+        [Hashtable] $LocalConfig,
+        [Hashtable] $GlobalConfig
+    )
+
+    Function Get-ConfigItem1 () {
+        Param (
+            [Parameter(Mandatory)][Object[]] $Name,
+            [Hashtable] $Config
+        )
+
+        $item = $Config
+        ForEach ($n in $Name) {
+            If ($null -eq $item) {
+                $null
+                return
+            }
+            $item = $item[$n]
+        }
+        $item
+    }
+
+    $localItem = Get-ConfigItem1 $Name $LocalConfig
+    If ($null -ne $localItem) {
+        $localItem
+        return
+    }
+    Get-ConfigItem1 $Name $GlobalConfig
+}
+
+Function Join-Hashtable() {
+    Param (
+        [Hashtable] $Primary,
+        [Hashtable] $Secondary
+    )
+
+    If ($null -eq $Primary) {
+        $Secondary
+        return
+    }
+    If ($null -eq $Secondary) {
+        $Primary
+        return
+    }
+
+    $result = $Primary.Clone()
+    ForEach ($key in $Secondary.Keys) {
+        If (-not $result.ContainsKey($key)) {
+            $result.Add($key, $Secondary[$key])
+        }
+    }
+    $result
 }
 
 Function All() {
@@ -83,7 +133,7 @@ Function Get-InstalledChocoItems() {
 
 # .SYNOPSIS
 #   Creats the ghcups.yaml with the default contents.
-function Write-GhcupsConfigTemplate () {
+function Write-GhcupsConfigTemplate() {
     Param (
         [String] $Path = '.'
     )
@@ -124,21 +174,19 @@ Function Set-Ghc() {
         [Parameter(Mandatory)][String] $Ghc
     )
 
-    $config = Get-Config (Find-Config (Get-Location))
-    $ghcDir = ''
-    If ($null -eq $config -or $null -eq $config['ghc'] -or $null -eq $config['ghc'][$Ghc]) {
+    $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
+    $globalConfig = Get-Config $globalConfigPath
+    $ghcDir = Get-ConfigItem -Name @('ghc', $Ghc) -LocalConfig $localConfig -GlobalConfig $globalConfig
+    If ($null -eq $ghcDir) {
         $ghcDir = Get-ChocoGhc $Ghc
     }
-    Else {
-        $ghcDir = $config['ghc'][$Ghc]
-    }
-    Set-PathEnv (Get-GhcPatterns $config) $ghcDir
+    Set-PathEnv (Get-GhcPatterns (Join-Hashtable $localConfig $globalConfig)) $ghcDir
 }
 
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
 Function Clear-Ghc() {
-    Set-PathEnv (Get-GhcPatterns (Get-Config (Find-Config (Get-Location)))) $null
+    Set-PathEnv (Get-GhcPatterns (Join-Hashtable (Get-Config (Find-LocalConfigPath (Get-Location))) (Get-Config $globalConfigPath))) $null
 }
 
 # .SYNOPSIS
@@ -169,7 +217,7 @@ Function Remove-Ghc() {
 # .SYNOPSIS
 #   Shows the GHCs which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
 Function Show-Ghc() {
-    $configPath = Find-Config (Get-Location)
+    $configPath = Find-LocalConfigPath (Get-Location)
     $config = Get-Config $configPath
     $span = $false
     If ($null -ne $config -and $null -ne $config['ghc'] -and 0 -lt $config['ghc'].Count) {
@@ -229,21 +277,19 @@ Function Set-Cabal() {
         [Parameter(Mandatory)][String] $Cabal
     )
 
-    $config = Get-Config (Get-Location)
-    $cabalDir = ''
-    If ($null -eq $config -or $null -eq $config['cabal'] -or $null -eq $config['cabal'][$Cabal]) {
+    $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
+    $globalConfig = Get-Config $globalConfigPath
+    $cabalDir = Get-ConfigItem -Name @('cabal', $Cabal) -LocalConfig $localConfig -GlobalConfig $globalConfig
+    If ($null -eq $cabalDir) {
         $cabalDir = Get-ChocoCabal $Cabal
     }
-    Else {
-        $cabalDir = $config['cabal'][$Cabal]
-    }
-    Set-PathEnv (Get-CabalPatterns $config) $cabalDir
+    Set-PathEnv (Get-CabalPatterns (Join-Hashtable $localConfig $globalConfig)) $cabalDir
 }
 
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
 Function Clear-Cabal() {
-    Set-PathEnv (Get-CabalPatterns (Get-Config (Get-Location))) $null
+    Set-PathEnv (Get-CabalPatterns (Join-Hashtable (Get-Config (Find-LocalConfigPath (Get-Location))) (Get-Config $globalConfigPath))) $null
 }
 
 # .SYNOPSIS
@@ -274,7 +320,7 @@ Function Remove-Cabal() {
 # .SYNOPSIS
 #   Shows the Cabals which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
 Function Show-Cabal() {
-    $configPath = Find-Config (Get-Location)
+    $configPath = Find-LocalConfigPath (Get-Location)
     $config = Get-Config $configPath
     $span = $false
     If ($null -ne $config -and $null -ne $config['cabal'] -and 0 -lt $config['cabal'].Count) {
