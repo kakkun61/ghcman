@@ -3,9 +3,24 @@
 Set-StrictMode -Version Latest
 
 Import-Module powershell-yaml
-Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
 
 Set-Variable originalPath -Option Constant -Value "$Env:Path"
+Set-Variable originalProgramData -Option Constant -Value "$Env:ProgramData"
+Set-Variable originalPWD -Option Constant -Value "$PWD"
+
+Function New-TemporaryDirectory {
+    $parent = [System.IO.Path]::GetTempPath()
+    [String] $name = [System.Guid]::NewGuid()
+    New-Item -ItemType Directory -Path (Join-Path $parent $name)
+}
+
+$Env:ProgramData = New-TemporaryDirectory
+New-Item -ItemType Directory -Path "$Env:ProgramData\ghcups"
+
+Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
+
+$tempPWD = New-TemporaryDirectory
+Set-Location $tempPWD
 
 Describe "Set-Ghc" {
     It "Add 8.8.1 to the empty path" {
@@ -48,11 +63,25 @@ Describe "Set-Ghc" {
         $Env:Path | Should Be 'C:\;C:\Windows'
     }
 
+    It "Add foo in global config when local config exists" {
+        $Env:Path = ''
+        'ghc: { foo: ''C:\'' }' | Out-File "$Env:ProgramData\ghcups\ghcups.yaml"
+        'ghc: { bar: ''C:\Windows'' }' | Out-File ghcups.yaml
+        Set-Ghc 'foo'
+        $Env:Path | Should Be 'C:\'
+    }
+
     AfterEach {
         Remove-Item 'ghcups.yaml' -ErrorAction Ignore
     }
 
     AfterAll {
+        Write-Debug 'AfterAll'
+        Remove-Item $Env:ProgramData -Recurse -ErrorAction Ignore
+        Set-Location $originalPWD
+        Write-Debug "Set-Location $originalPWD"
+        Remove-Item $tempPWD -Recurse
         Set-Item Env:\Path -Value "$originalPath"
+        Set-Item Env:\ProgramData -Value "$originalProgramData"
     }
 }
