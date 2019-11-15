@@ -45,10 +45,6 @@ RELATED LINKS
 
 ```
 
-## Auto load
-
-Copy _ghcups_ folder under `Env:\PSModulePath` folder like _`$Env:USERPROFILE`\Documents\WindowsPowerShell\Modules_.
-
 ## Configuration
 
 _ghcups.yaml_ is the configuration file. ghcups searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_. The global configuration file is placed in _`$Env:ProgramData`\ghcups_.
