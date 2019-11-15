@@ -48,8 +48,7 @@ Function Get-Config() {
 Function Get-ConfigItem() {
     Param (
         [Parameter(Mandatory)][Object[]] $Name,
-        [Hashtable] $LocalConfig,
-        [Hashtable] $GlobalConfig
+        [Hashtable[]] $Configs
     )
 
     Function Get-ConfigItem1 () {
@@ -69,33 +68,40 @@ Function Get-ConfigItem() {
         $item
     }
 
-    $localItem = Get-ConfigItem1 $Name $LocalConfig
-    If ($null -ne $localItem) {
-        $localItem
-        return
+    $item = $null
+    ForEach ($config in $Configs) {
+        $item = Get-ConfigItem1 $Name $config
+        If ($null -ne $item) {
+            $item
+            return
+        }
     }
-    Get-ConfigItem1 $Name $GlobalConfig
+    $item
 }
 
-Function Join-Hashtable() {
+Function Join-Hashtables() {
     Param (
-        [Hashtable] $Primary,
-        [Hashtable] $Secondary
+        [Hashtable[]] $Hashtables
     )
 
-    If ($null -eq $Primary) {
-        $Secondary
-        return
-    }
-    If ($null -eq $Secondary) {
-        $Primary
+    If ($null -eq $Hashtables -or @() -eq $Hashtables) {
+        $null
         return
     }
 
-    $result = $Primary.Clone()
-    ForEach ($key in $Secondary.Keys) {
-        If (-not $result.ContainsKey($key)) {
-            $result.Add($key, $Secondary[$key])
+    $result = $null
+    ForEach ($h in $Hashtables) {
+        If ($null -eq $h) {
+            continue
+        }
+        If ($null -eq $result) {
+            $result = $h.Clone()
+            continue
+        }
+        ForEach ($key in $h.Keys) {
+            If (-not ($result.ContainsKey($key))) {
+                $result.Add($key, $h[$key])
+            }
         }
     }
     $result
@@ -176,17 +182,17 @@ Function Set-Ghc() {
 
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $globalConfig = Get-Config $globalConfigPath
-    $ghcDir = Get-ConfigItem -Name @('ghc', $Ghc) -LocalConfig $localConfig -GlobalConfig $globalConfig
+    $ghcDir = Get-ConfigItem -Name 'ghc', $Ghc -Configs $localConfig, $globalConfig
     If ($null -eq $ghcDir) {
         $ghcDir = Get-ChocoGhc $Ghc
     }
-    Set-PathEnv (Get-GhcPatterns (Join-Hashtable $localConfig $globalConfig)) $ghcDir
+    Set-PathEnv (Get-GhcPatterns (Join-Hashtables $localConfig, $globalConfig)) $ghcDir
 }
 
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
 Function Clear-Ghc() {
-    Set-PathEnv (Get-GhcPatterns (Join-Hashtable (Get-Config (Find-LocalConfigPath (Get-Location))) (Get-Config $globalConfigPath))) $null
+    Set-PathEnv (Get-GhcPatterns (Join-Hashtables (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath))) $null
 }
 
 # .SYNOPSIS
@@ -279,17 +285,17 @@ Function Set-Cabal() {
 
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $globalConfig = Get-Config $globalConfigPath
-    $cabalDir = Get-ConfigItem -Name @('cabal', $Cabal) -LocalConfig $localConfig -GlobalConfig $globalConfig
+    $cabalDir = Get-ConfigItem -Name 'cabal', $Cabal -Configs $localConfig, $globalConfig
     If ($null -eq $cabalDir) {
         $cabalDir = Get-ChocoCabal $Cabal
     }
-    Set-PathEnv (Get-CabalPatterns (Join-Hashtable $localConfig $globalConfig)) $cabalDir
+    Set-PathEnv (Get-CabalPatterns (Join-Hashtables $localConfig, $globalConfig)) $cabalDir
 }
 
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
 Function Clear-Cabal() {
-    Set-PathEnv (Get-CabalPatterns (Join-Hashtable (Get-Config (Find-LocalConfigPath (Get-Location))) (Get-Config $globalConfigPath))) $null
+    Set-PathEnv (Get-CabalPatterns (Join-Hashtables (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath))) $null
 }
 
 # .SYNOPSIS
