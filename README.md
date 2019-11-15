@@ -66,7 +66,7 @@ cabal:
 
 - `Install-Ghc`
   - Installs the specified GHC with the Chocolatey.
-- `Remove-Ghc`
+- `Uninstall-Ghc`
   - Uninstalls the specified GHC with the Chocolatey.
 - `Set-Ghc`
   - Sets the version or variant of GHC to the Path environment variable of the current session.
@@ -76,7 +76,7 @@ cabal:
   - Shows the GHCs which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
 - `Install-Cabal`
   - Installs the specified Cabal with the Chocolatey.
-- `Remove-Cabal`
+- `Uninstall-Cabal`
   - Uninstalls the specified Cabal with the Chocolatey.
 - `Set-Cabal`
   - Sets the version or variant of Cabal to the Path environment variable of the current session.

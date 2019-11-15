@@ -206,7 +206,7 @@ Function Install-Ghc() {
 
 # .SYNOPSIS
 #   Uninstalls the specified GHC with the Chocolatey.
-Function Remove-Ghc() {
+Function Uninstall-Ghc() {
     Param (
         [Parameter(Mandatory)][String] $Ghc
     )
@@ -309,7 +309,7 @@ Function Install-Cabal() {
 
 # .SYNOPSIS
 #   Uninstalls the specified Cabal with the Chocolatey.
-Function Remove-Cabal() {
+Function Uninstall-Cabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal
     )
@@ -349,4 +349,4 @@ Function Show-Cabal() {
 
 # Export
 
-Export-ModuleMember -Function 'Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Show-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal', 'Show-Cabal', 'Write-GhcupsConfigTemplate'
+Export-ModuleMember -Function 'Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Uninstall-Ghc', 'Show-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Uninstall-Cabal', 'Show-Cabal', 'Write-GhcupsConfigTemplate'
