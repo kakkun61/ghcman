@@ -9,7 +9,7 @@
 @{
 
 # このマニフェストに関連付けられているスクリプト モジュール ファイルまたはバイナリ モジュール ファイル。
-# RootModule = ''
+RootModule = 'ghcups.psm1'
 
 # このモジュールのバージョン番号です。
 ModuleVersion = '1.0'
@@ -33,7 +33,7 @@ Copyright = '2019 IIJ Innovation Institute Inc.'
 # Description = ''
 
 # このモジュールに必要な Windows PowerShell エンジンの最小バージョン
-# PowerShellVersion = ''
+PowerShellVersion = '3.0'
 
 # このモジュールに必要な Windows PowerShell ホストの名前
 # PowerShellHostName = ''
@@ -66,7 +66,7 @@ RequiredModules = @('powershell-yaml')
 # FormatsToProcess = @()
 
 # RootModule/ModuleToProcess に指定されているモジュールの入れ子になったモジュールとしてインポートするモジュール
-NestedModules = @('ghcups.psm1')
+NestedModules = @()
 
 # このモジュールからエクスポートする関数です。最適なパフォーマンスを得るには、ワイルドカードを使用せず、エクスポートする関数がない場合は、エントリを削除しないで空の配列を使用してください。
 FunctionsToExport = @('Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Remove-Ghc', 'Show-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Remove-Cabal', 'Show-Cabal', 'Write-GhcupsConfigTemplate')
@@ -95,19 +95,19 @@ PrivateData = @{
     PSData = @{
 
         # このモジュールに適用されているタグ。オンライン ギャラリーでモジュールを検出する際に役立ちます。
-        # Tags = @()
+        Tags = @('Haskell', 'GHC', 'PSEdition_Desktop', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/1.0/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/kakkun61/ghcups'
 
         # このモジュールを表すアイコンの URL。
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        # ReleaseNotes = ''
+        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/1.0/ChangeLog.md'
 
     } # PSData ハッシュテーブル終了
 
