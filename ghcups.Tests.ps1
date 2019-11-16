@@ -6,6 +6,7 @@ Import-Module powershell-yaml
 
 Set-Variable originalPath -Option Constant -Value "$Env:Path"
 Set-Variable originalProgramData -Option Constant -Value "$Env:ProgramData"
+Set-Variable originalAPPDATA -Option Constant -Value "$Env:APPDATA"
 Set-Variable originalPWD -Option Constant -Value "$PWD"
 
 Function New-TemporaryDirectory {
@@ -16,6 +17,9 @@ Function New-TemporaryDirectory {
 
 $Env:ProgramData = New-TemporaryDirectory
 New-Item -ItemType Directory -Path "$Env:ProgramData\ghcups"
+
+$Env:APPDATA = New-TemporaryDirectory
+New-Item -ItemType Directory -Path "$Env:APPDATA\ghcups"
 
 Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
 
@@ -63,12 +67,21 @@ Describe "Set-Ghc" {
         $Env:Path | Should -Be 'C:\;C:\Windows'
     }
 
-    It "Add foo in global config when local config exists" {
+    It "Add foo in system global config when local config exists" {
         $Env:Path = ''
-        'ghc: { foo: ''C:\'' }' | Out-File "$Env:ProgramData\ghcups\ghcups.yaml"
+        'ghc: { foo: ''C:\'' }' | Out-File "$Env:ProgramData\ghcups\config.yaml"
         'ghc: { bar: ''C:\Windows'' }' | Out-File ghcups.yaml
         Set-Ghc 'foo'
         $Env:Path | Should -Be 'C:\'
+    }
+
+    It "Add bar in user global config when local and system global configs exists" {
+        $Env:Path = ''
+        'ghc: { foo: ''C:\'' }' | Out-File "$Env:ProgramData\ghcups\config.yaml"
+        'ghc: { bar: ''C:\Users'' }' | Out-File "$Env:APPDATA\ghcups\config.yaml"
+        'ghc: { buz: ''C:\Windows'' }' | Out-File ghcups.yaml
+        Set-Ghc 'bar'
+        $Env:Path | Should -Be 'C:\Users'
     }
 
     AfterEach {
@@ -79,7 +92,8 @@ Describe "Set-Ghc" {
         Remove-Item $Env:ProgramData -Recurse -ErrorAction Ignore
         Set-Location $originalPWD
         Remove-Item $tempPWD -Recurse
-        Set-Item Env:\Path -Value "$originalPath"
-        Set-Item Env:\ProgramData -Value "$originalProgramData"
+        Set-Item Env:\Path -Value $originalPath
+        Set-Item Env:\ProgramData -Value $originalProgramData
+        Set-Item Env:\APPDATA -Value $originalAPPDATA
     }
 }

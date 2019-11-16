@@ -2,11 +2,12 @@ Set-StrictMode -Version Latest
 
 # Constant
 
-Set-Variable dataDir -Option Constant -Value "$Env:ProgramData\ghcups"
+Set-Variable systemGlobalDataPath -Option Constant -Value "$Env:ProgramData\ghcups"
+Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcups"
 Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin')
-Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal.[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
-Set-Variable configFileName -Option Constant -Value 'ghcups.yaml'
-Set-Variable globalConfigPath -Option Constant -Value "$dataDir\$configFileName"
+Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal .[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+Set-Variable localConfigName -Option Constant -Value 'ghcups.yaml'
+Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 
 # Common
 
@@ -20,7 +21,7 @@ Function Find-LocalConfigPath() {
             ''
             return
         }
-        $test = Join-Path $Dir $configFileName
+        $test = Join-Path $Dir $localConfigName
         If (Test-Path $test) {
             $test
             return
@@ -45,43 +46,48 @@ Function Get-Config() {
     ConvertFrom-Yaml (Get-Content $Path -Raw)
 }
 
-Function Get-ConfigItem() {
+Function Get-HashtaleItem() {
     Param (
         [Parameter(Mandatory)][Object[]] $Name,
-        [Hashtable[]] $Configs
+        [Hashtable] $Hashtable
     )
 
-    Function Get-ConfigItem1 () {
-        Param (
-            [Parameter(Mandatory)][Object[]] $Name,
-            [Hashtable] $Config
-        )
-
-        $item = $Config
-        ForEach ($n in $Name) {
-            If ($null -eq $item) {
-                $null
-                return
-            }
-            $item = $item[$n]
-        }
-        $item
-    }
-
-    $item = $null
-    ForEach ($config in $Configs) {
-        $item = Get-ConfigItem1 $Name $config
-        If ($null -ne $item) {
-            $item
+    $item = $Hashtable
+    ForEach ($n in $Name) {
+        If ($null -eq $item) {
+            $null
             return
         }
+        $item = $item[$n]
     }
     $item
 }
 
+Function Copy-HashtableDeeply() {
+    Param (
+        [Hashtable] $Hashtable
+    )
+
+    $result = @{}
+    ForEach ($key in $Hashtable.Keys) {
+        $item = $Hashtable[$key]
+        If ($item -is [Hashtable]) {
+            $result.Add($key, (Copy-HashtableDeeply $item))
+            continue
+        }
+        If ($null -eq $item) {
+            $result.Add($key, $null)
+            continue
+        }
+        $result.Add($key, $item.Clone())
+    }
+    $result
+}
+
 Function Join-Hashtables() {
     Param (
-        [Hashtable[]] $Hashtables
+        [Hashtable[]] $Hashtables,
+        [Switch] $Breaking = $false
     )
 
     If ($null -eq $Hashtables -or @() -eq $Hashtables) {
@@ -95,11 +101,20 @@ Function Join-Hashtables() {
             continue
         }
         If ($null -eq $result) {
-            $result = $h.Clone()
+            If ($Breaking) {
+                $result = $h
+            }
+            Else {
+                $result = Copy-HashtableDeeply $h
+            }
             continue
         }
         ForEach ($key in $h.Keys) {
-            If (-not ($result.ContainsKey($key))) {
+            $value = $h[$key]
+            If ($result.ContainsKey($key) -and $result -is [Hashtable] -and $value -is [Hashtable]) {
+                [void] (Join-Hashtables $result[$key], $value -Breaking)
+            }
+            Else {
                 $result.Add($key, $h[$key])
             }
         }
@@ -134,7 +149,7 @@ Function Get-InstalledChocoItems() {
     )
 
     $path = "$Env:ChocolateyInstall\lib\$App."
-    Get-Item "$path*" | ForEach-Object { ([String]$_).Remove(0, "$path".Length) }
+    Get-Item "$path*" | ForEach-Object { ([String]$_).Remove(0, $path.Length) }
 }
 
 # .SYNOPSIS
@@ -144,26 +159,28 @@ function Write-GhcupsConfigTemplate() {
         [String] $Path = '.'
     )
 
-    "# The key is the name you want, the value is the path of directory which contains ghc, ghci, etc.`nghc: {}`n`n# The same with ghc for cabal.`ncabal: {}" | Out-File (Join-Path $Path $configFileName) -NoClobber
+    "# The key is the name you want, the value is the path of directory which contains ghc, ghci, etc.`nghc: {}`n`n# The same with ghc for cabal.`ncabal: {}" | Out-File (Join-Path $Path $localConfigName) -NoClobber
 }
 
-# GHC
-
-Function Get-GhcPatterns() {
+Function Get-ExePathsFromConfigs() {
     Param (
-        [Parameter(Mandatory)][AllowNull()][Hashtable] $Config
+        [Hashtable[]] $Configs,
+        [String] $name
     )
 
-    $patterns = ,$ghcPathPattern
-    If ($null -ne $Config -and $null -ne $Config['ghc']) {
-        ForEach ($path in $Config.ghc.Values) {
-            If (-not [String]::IsNullOrEmpty($path)) {
-                $patterns += '\A' + [Regex]::Escape($path) + '\Z'
-            }
-        }
+    $patterns = `
+      $Configs | `
+      ForEach-Object { Get-HashtaleItem $name $_ } | `
+      Where-Object { $null -ne $_ } | `
+      ForEach-Object -Begin { [Diagnostics.CodeAnalysis.SuppressMessageAttribute('UseDeclaredVarsMoreThanAssignments', 'paths')] $paths = @() } -Process { $paths += $_.Values } -End { $paths } | `
+      Where-Object { -not [String]::IsNullOrEmpty($_) }
+    If ($null -eq $patterns) {
+        @()
     }
     $patterns
 }
+
+# GHC
 
 Function Get-ChocoGhc() {
     Param (
@@ -181,18 +198,22 @@ Function Set-Ghc() {
     )
 
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
-    $globalConfig = Get-Config $globalConfigPath
-    $ghcDir = Get-ConfigItem -Name 'ghc', $Ghc -Configs $localConfig, $globalConfig
+    $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
+    $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
+    [Hashtable] $cs = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
+    $ghcDir = Get-HashtaleItem -Name 'ghc', $Ghc -Hashtable $cs
     If ($null -eq $ghcDir) {
         $ghcDir = Get-ChocoGhc $Ghc
     }
-    Set-PathEnv (Get-GhcPatterns (Join-Hashtables $localConfig, $globalConfig)) $ghcDir
+    $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'ghc' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
+    $patterns += $ghcPathPattern
+    Set-PathEnv $patterns $ghcDir
 }
 
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
 Function Clear-Ghc() {
-    Set-PathEnv (Get-GhcPatterns (Join-Hashtables (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath))) $null
+    Set-PathEnv (Get-GhcPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
 }
 
 # .SYNOPSIS
@@ -227,7 +248,7 @@ Function Show-Ghc() {
     $config = Get-Config $configPath
     $span = $false
     If ($null -ne $config -and $null -ne $config['ghc'] -and 0 -lt $config['ghc'].Count) {
-        Write-Host "$configFileName ($(Split-Path $configPath -Parent))"
+        Write-Host "$localConfigName ($(Split-Path $configPath -Parent))"
         ForEach ($k in $config.ghc.Keys) {
             Write-Host "    ${k}:    $($config.ghc[$k])"
         }
@@ -252,22 +273,6 @@ Function Show-Ghc() {
 
 # Cabal
 
-Function Get-CabalPatterns() {
-    Param (
-        [Parameter(Mandatory)][AllowNull()][Hashtable] $Config
-    )
-
-    $patterns = ,$cabalPathPattern
-    If ($null -ne $Config -and $null -ne $Config['cabal']) {
-        ForEach ($path in $Config.cabal.Values) {
-            If (-not [String]::IsNullOrEmpty($path)) {
-                $patterns += [Regex]::Escape($path)
-            }
-        }
-    }
-    $patterns
-}
-
 Function Get-ChocoCabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal
@@ -277,25 +282,28 @@ Function Get-ChocoCabal() {
 }
 
 # .SYNOPSIS
-#   Sets the version or variant of Cabal to the Path environment variable of the current session.pa
+#   Sets the version or variant of Cabal to the Path environment variable of the current session.
 Function Set-Cabal() {
     Param (
         [Parameter(Mandatory)][String] $Cabal
     )
 
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
-    $globalConfig = Get-Config $globalConfigPath
-    $cabalDir = Get-ConfigItem -Name 'cabal', $Cabal -Configs $localConfig, $globalConfig
+    $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
+    $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
+    $cabalDir = Get-HashtaleItem -Name 'cabal', $Cabal -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
     If ($null -eq $cabalDir) {
         $cabalDir = Get-ChocoCabal $Cabal
     }
-    Set-PathEnv (Get-CabalPatterns (Join-Hashtables $localConfig, $globalConfig)) $cabalDir
+    $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'cabal' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
+    $patterns += $cabalPathPattern
+    Set-PathEnv $patterns $cabalDir
 }
 
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
 Function Clear-Cabal() {
-    Set-PathEnv (Get-CabalPatterns (Join-Hashtables (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath))) $null
+    Set-PathEnv (Get-CabalPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
 }
 
 # .SYNOPSIS
@@ -330,7 +338,7 @@ Function Show-Cabal() {
     $config = Get-Config $configPath
     $span = $false
     If ($null -ne $config -and $null -ne $config['cabal'] -and 0 -lt $config['cabal'].Count) {
-        Write-Host "$configFileName ($(Split-Path $configPath -Parent))"
+        Write-Host "$localConfigName ($(Split-Path $configPath -Parent))"
         ForEach ($k in $config.cabal.Keys) {
             Write-Host "    ${k}:    $($config.cabal[$k])"
         }
