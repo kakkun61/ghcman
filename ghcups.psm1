@@ -11,7 +11,7 @@ Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 
 # Common
 
-Function Find-LocalConfigPath() {
+Function Find-LocalConfigPath {
     Param (
         [Parameter(Mandatory)][String] $Dir
     )
@@ -30,7 +30,7 @@ Function Find-LocalConfigPath() {
     }
 }
 
-Function Get-Config() {
+Function Get-Config {
     Param (
         [Parameter(Mandatory)][AllowNull()][AllowEmptyString()][String] $Path
     )
@@ -46,7 +46,7 @@ Function Get-Config() {
     ConvertFrom-Yaml (Get-Content $Path -Raw)
 }
 
-Function Get-HashtaleItem() {
+Function Get-HashtaleItem {
     Param (
         [Parameter(Mandatory)][Object[]] $Name,
         [Hashtable] $Hashtable
@@ -63,7 +63,7 @@ Function Get-HashtaleItem() {
     $item
 }
 
-Function Copy-HashtableDeeply() {
+Function Copy-HashtableDeeply {
     Param (
         [Hashtable] $Hashtable
     )
@@ -84,7 +84,7 @@ Function Copy-HashtableDeeply() {
     $result
 }
 
-Function Join-Hashtables() {
+Function Join-Hashtables {
     Param (
         [Hashtable[]] $Hashtables,
         [Switch] $Breaking = $false
@@ -122,14 +122,14 @@ Function Join-Hashtables() {
     $result
 }
 
-Function All() {
+Function All {
     Param ([Parameter(ValueFromPipeline)][Boolean[]] $ps)
     Begin { $acc = $true }
     Process { ForEach ($p in $ps) { $acc = $acc -and $p } }
     End { $acc }
 }
 
-Function Set-PathEnv() {
+Function Set-PathEnv {
     Param (
         [Parameter(Mandatory)][String[]] $patterns,
         [Parameter(Mandatory)][AllowEmptyString()][String] $path
@@ -143,7 +143,7 @@ Function Set-PathEnv() {
     Set-Item Env:\Path -Value ($newPaths -Join ';')
 }
 
-Function Get-InstalledChocoItems() {
+Function Get-InstalledChocoItems {
     Param (
         [Parameter(Mandatory)][String] $App
     )
@@ -154,7 +154,7 @@ Function Get-InstalledChocoItems() {
 
 # .SYNOPSIS
 #   Creats the ghcups.yaml with the default contents.
-function Write-GhcupsConfigTemplate() {
+function Write-GhcupsConfigTemplate {
     Param (
         [String] $Path = '.'
     )
@@ -162,7 +162,7 @@ function Write-GhcupsConfigTemplate() {
     "# The key is the name you want, the value is the path of directory which contains ghc, ghci, etc.`nghc: {}`n`n# The same with ghc for cabal.`ncabal: {}" | Out-File (Join-Path $Path $localConfigName) -NoClobber
 }
 
-Function Get-ExePathsFromConfigs() {
+Function Get-ExePathsFromConfigs {
     Param (
         [Hashtable[]] $Configs,
         [String] $name
@@ -182,7 +182,7 @@ Function Get-ExePathsFromConfigs() {
 
 # GHC
 
-Function Get-ChocoGhc() {
+Function Get-ChocoGhc {
     Param (
         [Parameter(Mandatory)][String] $Ghc
     )
@@ -192,7 +192,7 @@ Function Get-ChocoGhc() {
 
 # .SYNOPSIS
 #   Sets the version or variant of GHC to the Path environment variable of the current session.
-Function Set-Ghc() {
+Function Set-Ghc {
     Param (
         [Parameter(Mandatory)][String] $Ghc
     )
@@ -212,13 +212,13 @@ Function Set-Ghc() {
 
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
-Function Clear-Ghc() {
+Function Clear-Ghc {
     Set-PathEnv (Get-GhcPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
 }
 
 # .SYNOPSIS
 #   Installs the specified GHC with the Chocolatey.
-Function Install-Ghc() {
+Function Install-Ghc {
     Param (
         [Parameter(Mandatory)][String] $Ghc,
         [Switch] $Set = $false
@@ -233,7 +233,7 @@ Function Install-Ghc() {
 
 # .SYNOPSIS
 #   Uninstalls the specified GHC with the Chocolatey.
-Function Uninstall-Ghc() {
+Function Uninstall-Ghc {
     Param (
         [Parameter(Mandatory)][String] $Ghc
     )
@@ -243,7 +243,7 @@ Function Uninstall-Ghc() {
 
 # .SYNOPSIS
 #   Shows the GHCs which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
-Function Show-Ghc() {
+Function Show-Ghc {
     $configPath = Find-LocalConfigPath (Get-Location)
     $config = Get-Config $configPath
     $span = $false
@@ -273,7 +273,7 @@ Function Show-Ghc() {
 
 # Cabal
 
-Function Get-ChocoCabal() {
+Function Get-ChocoCabal {
     Param (
         [Parameter(Mandatory)][String] $Cabal
     )
@@ -283,7 +283,7 @@ Function Get-ChocoCabal() {
 
 # .SYNOPSIS
 #   Sets the version or variant of Cabal to the Path environment variable of the current session.
-Function Set-Cabal() {
+Function Set-Cabal {
     Param (
         [Parameter(Mandatory)][String] $Cabal
     )
@@ -302,13 +302,13 @@ Function Set-Cabal() {
 
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
-Function Clear-Cabal() {
+Function Clear-Cabal {
     Set-PathEnv (Get-CabalPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
 }
 
 # .SYNOPSIS
 #   Installs the specified Cabal with the Chocolatey.
-Function Install-Cabal() {
+Function Install-Cabal {
     Param (
         [Parameter(Mandatory)][String] $Cabal,
         [Switch] $Set = $false
@@ -323,7 +323,7 @@ Function Install-Cabal() {
 
 # .SYNOPSIS
 #   Uninstalls the specified Cabal with the Chocolatey.
-Function Uninstall-Cabal() {
+Function Uninstall-Cabal {
     Param (
         [Parameter(Mandatory)][String] $Cabal
     )
@@ -333,7 +333,7 @@ Function Uninstall-Cabal() {
 
 # .SYNOPSIS
 #   Shows the Cabals which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
-Function Show-Cabal() {
+Function Show-Cabal {
     $configPath = Find-LocalConfigPath (Get-Location)
     $config = Get-Config $configPath
     $span = $false
