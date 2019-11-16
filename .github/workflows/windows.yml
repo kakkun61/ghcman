@@ -57,7 +57,7 @@ jobs:
       run: |
         $ErrorActionPreference = 'Stop'
         Install-Module PSScriptAnalyzer -Force
-    - name: Test
+    - name: Lint
       shell: pwsh
       run: |
         $ErrorActionPreference = 'Stop'
