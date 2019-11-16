@@ -1,5 +1,9 @@
 # Change log
 
+## 2.0.1
+
+Fix README about #3.
+
 ## 2.0
 
 ### Breaking changes
