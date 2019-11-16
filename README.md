@@ -47,7 +47,7 @@ RELATED LINKS
 
 ## Configuration
 
-_ghcups.yaml_ is the local configuration file. ghcups searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_ or the root. The user global configuration file is `$Env:APPDATA`\ghcups\config.yaml_, and the system global one is _`$Env:ProgramData`\ghcups\config.yaml_.
+_ghcups.yaml_ is the local configuration file. ghcups searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_ or the root. The user global configuration file is _`$Env:APPDATA`\ghcups\config.yaml_, and the system global one is _`$Env:ProgramData`\ghcups\config.yaml_.
 
 This is a sample of _ghcups.yaml_.
 
