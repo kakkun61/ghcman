@@ -242,13 +242,21 @@ Function Uninstall-Ghc {
 }
 
 # .SYNOPSIS
-#   Shows the GHCs which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
+#   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 Function Show-Ghc {
-    $configPath = Find-LocalConfigPath (Get-Location)
-    $config = Get-Config $configPath
+    $localConfigPath = Find-LocalConfigPath (Get-Location)
+    $localConfigDir = $null
+    If (-not [String]::IsNullOrEmpty($localConfigPath)) {
+        $localConfigDir = Split-Path $localConfigPath -Parent
+    }
+    $localConfig = Get-Config $localConfigPath
+    $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
+    $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
+    $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $span = $false
-    If ($null -ne $config -and $null -ne $config['ghc'] -and 0 -lt $config['ghc'].Count) {
-        Write-Host "$localConfigName ($(Split-Path $configPath -Parent))"
+    $ghcs = Get-HashtaleItem 'ghc' $config
+    If ($null -ne $ghcs -and 0 -lt $ghcs.Count) {
+        Write-Host "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         ForEach ($k in $config.ghc.Keys) {
             Write-Host "    ${k}:    $($config.ghc[$k])"
         }
@@ -268,7 +276,8 @@ Function Show-Ghc {
     If ($span) {
         Write-Host
     }
-    choco list ghc --by-id-only --all-versions
+    Write-Host 'Chocolatey (Remote)'
+    choco list ghc --by-id-only --all-versions | ForEach-Object { "    $_" }
 }
 
 # Cabal
@@ -332,13 +341,21 @@ Function Uninstall-Cabal {
 }
 
 # .SYNOPSIS
-#   Shows the Cabals which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
+#   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 Function Show-Cabal {
-    $configPath = Find-LocalConfigPath (Get-Location)
-    $config = Get-Config $configPath
+    $localConfigPath = Find-LocalConfigPath (Get-Location)
+    $localConfigDir = $null
+    If (-not [String]::IsNullOrEmpty($localConfigPath)) {
+        $localConfigDir = Split-Path $localConfigPath -Parent
+    }
+    $localConfig = Get-Config $localConfigPath
+    $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
+    $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
+    $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $span = $false
-    If ($null -ne $config -and $null -ne $config['cabal'] -and 0 -lt $config['cabal'].Count) {
-        Write-Host "$localConfigName ($(Split-Path $configPath -Parent))"
+    $cabals = Get-HashtaleItem 'cabal' $config
+    If ($null -ne $cabals -and 0 -lt $cabals.Count) {
+        Write-Host "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         ForEach ($k in $config.cabal.Keys) {
             Write-Host "    ${k}:    $($config.cabal[$k])"
         }
@@ -350,15 +367,16 @@ Function Show-Cabal {
             Write-Host
         }
         Write-Host 'Chocolatey (Installed)'
-        ForEach ($c in $chocoCabals) {
-            Write-Host "    ${c}:    $Env:ChocolateyInstall\lib\cabal.$c\tools\cabal-$c"
+        ForEach ($g in $chocoCabals) {
+            Write-Host "    ${g}:    $Env:ChocolateyInstall\lib\cabal.$g\tools\cabal-$g\bin"
         }
         $span = $true
     }
     If ($span) {
         Write-Host
     }
-    choco list cabal --by-id-only --all-versions
+    Write-Host 'Chocolatey (Remote)'
+    choco list cabal --by-id-only --all-versions | ForEach-Object { "    $_" }
 }
 
 # Export

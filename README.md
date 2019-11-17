@@ -49,7 +49,7 @@ RELATED LINKS
 
 _ghcups.yaml_ is the local configuration file. ghcups searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_ or the root. The user global configuration file is _`$Env:APPDATA`\ghcups\config.yaml_, and the system global one is _`$Env:ProgramData`\ghcups\config.yaml_.
 
-This is a sample of _ghcups.yaml_.
+This is a sample of _ghcups.yaml_ and _config.yaml_.
 
 ```yaml
 ghc:
@@ -73,7 +73,7 @@ cabal:
 - `Clear-Ghc`
   - Removes all GHC values from the Path environment variable of the current session.
 - `Show-Ghc`
-  - Shows the GHCs which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
+  - Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 - `Install-Cabal`
   - Installs the specified Cabal with the Chocolatey.
 - `Uninstall-Cabal`
@@ -83,6 +83,6 @@ cabal:
 - `Clear-Cabal`
   - Removes all Cabal values from the Path environment variable of the current session.
 - `Show-Cabal`
-  - Shows the Cabals which is specified by the ghcups.yaml, is installed by the Chocolatey and is hosted on the Chocolatey repository.
+  - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 - `Write-GhcupsConfigTemplate`
   - Creats the ghcups.yaml with the default contents.
