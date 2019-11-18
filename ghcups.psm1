@@ -4,8 +4,9 @@ Set-StrictMode -Version Latest
 
 Set-Variable systemGlobalDataPath -Option Constant -Value "$Env:ProgramData\ghcups"
 Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcups"
-Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\ghc-[0-9]+\.[0-9]+\.[0-9]+\\bin')
-Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal .[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\\tools\\cabal-[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
+Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.' + $versionPattern + '\\tools\\ghc-' + $versionPattern + '\\bin')
+Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal\.' + $versionPattern + '\\tools\\cabal-' + $versionPattern)
 Set-Variable localConfigName -Option Constant -Value 'ghcups.yaml'
 Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 
@@ -234,7 +235,11 @@ function Set-Ghc {
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     [Hashtable] $cs = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $ghcDir = Get-HashtaleItem -Name 'ghc', $Ghc -Hashtable $cs
-    if ($null -eq $ghcDir) {
+    if ([String]::IsNullOrEmpty($ghcDir)) {
+        if ($Ghc -notmatch ('\A' + $versionPattern + '\Z')) {
+            Write-Error "No sutch GHC: $Ghc"
+            return
+        }
         $ghcDir = Get-ChocoGhc $Ghc
     }
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'ghc' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
@@ -343,7 +348,11 @@ function Set-Cabal {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $cabalDir = Get-HashtaleItem -Name 'cabal', $Cabal -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
-    if ($null -eq $cabalDir) {
+    if ([String]::IsNullOrEmpty($cabalDir)) {
+        if ($Cabal -notmatch ('\A' + $versionPattern + '\Z')) {
+            Write-Error "No sutch Cabal: $Cabal"
+            return
+        }
         $cabalDir = Get-ChocoCabal $Cabal
     }
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'cabal' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
