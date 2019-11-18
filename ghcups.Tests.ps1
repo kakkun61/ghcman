@@ -9,7 +9,7 @@ Set-Variable originalProgramData -Option Constant -Value "$Env:ProgramData"
 Set-Variable originalAPPDATA -Option Constant -Value "$Env:APPDATA"
 Set-Variable originalPWD -Option Constant -Value "$PWD"
 
-Function New-TemporaryDirectory {
+function New-TemporaryDirectory {
     $parent = [System.IO.Path]::GetTempPath()
     [String] $name = [System.Guid]::NewGuid()
     New-Item -ItemType Directory -Path (Join-Path $parent $name)

@@ -11,18 +11,18 @@ Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 
 # Common
 
-Function Find-LocalConfigPath {
-    Param (
+function Find-LocalConfigPath {
+    param (
         [Parameter(Mandatory)][String] $Dir
     )
 
     While ($true) {
-        If ($Dir -eq $Env:USERPROFILE -or [String]::IsNullOrEmpty($Dir)) {
+        if ($Dir -eq $Env:USERPROFILE -or [String]::IsNullOrEmpty($Dir)) {
             ''
             return
         }
         $test = Join-Path $Dir $localConfigName
-        If (Test-Path $test) {
+        if (Test-Path $test) {
             $test
             return
         }
@@ -30,31 +30,31 @@ Function Find-LocalConfigPath {
     }
 }
 
-Function Get-Config {
-    Param (
+function Get-Config {
+    param (
         [Parameter(Mandatory)][AllowNull()][AllowEmptyString()][String] $Path
     )
 
-    If ([String]::IsNullOrEmpty($Path)) {
+    if ([String]::IsNullOrEmpty($Path)) {
         $null
         return
     }
-    If (-not (Test-Path $Path)) {
+    if (-not (Test-Path $Path)) {
         $null
         return
     }
     ConvertFrom-Yaml (Get-Content $Path -Raw)
 }
 
-Function Get-HashtaleItem {
-    Param (
+function Get-HashtaleItem {
+    param (
         [Parameter(Mandatory)][Object[]] $Name,
         [Hashtable] $Hashtable
     )
 
     $item = $Hashtable
-    ForEach ($n in $Name) {
-        If ($null -eq $item) {
+    foreach ($n in $Name) {
+        if ($null -eq $item) {
             $null
             return
         }
@@ -63,19 +63,19 @@ Function Get-HashtaleItem {
     $item
 }
 
-Function Copy-HashtableDeeply {
-    Param (
+function Copy-HashtableDeeply {
+    param (
         [Hashtable] $Hashtable
     )
 
     $result = @{}
-    ForEach ($key in $Hashtable.Keys) {
+    foreach ($key in $Hashtable.Keys) {
         $item = $Hashtable[$key]
-        If ($item -is [Hashtable]) {
+        if ($item -is [Hashtable]) {
             $result.Add($key, (Copy-HashtableDeeply $item))
             continue
         }
-        If ($null -eq $item) {
+        if ($null -eq $item) {
             $result.Add($key, $null)
             continue
         }
@@ -84,37 +84,37 @@ Function Copy-HashtableDeeply {
     $result
 }
 
-Function Join-Hashtables {
-    Param (
+function Join-Hashtables {
+    param (
         [Hashtable[]] $Hashtables,
         [Switch] $Breaking = $false
     )
 
-    If ($null -eq $Hashtables -or @() -eq $Hashtables) {
+    if ($null -eq $Hashtables -or @() -eq $Hashtables) {
         $null
         return
     }
 
     $result = $null
-    ForEach ($h in $Hashtables) {
-        If ($null -eq $h) {
+    foreach ($h in $Hashtables) {
+        if ($null -eq $h) {
             continue
         }
-        If ($null -eq $result) {
-            If ($Breaking) {
+        if ($null -eq $result) {
+            if ($Breaking) {
                 $result = $h
             }
-            Else {
+            else {
                 $result = Copy-HashtableDeeply $h
             }
             continue
         }
-        ForEach ($key in $h.Keys) {
+        foreach ($key in $h.Keys) {
             $value = $h[$key]
-            If ($result.ContainsKey($key) -and $result -is [Hashtable] -and $value -is [Hashtable]) {
+            if ($result.ContainsKey($key) -and $result -is [Hashtable] -and $value -is [Hashtable]) {
                 [void] (Join-Hashtables $result[$key], $value -Breaking)
             }
-            Else {
+            else {
                 $result.Add($key, $h[$key])
             }
         }
@@ -122,29 +122,29 @@ Function Join-Hashtables {
     $result
 }
 
-Function All {
-    Param ([Parameter(ValueFromPipeline)][Boolean[]] $ps)
-    Begin { $acc = $true }
-    Process { ForEach ($p in $ps) { $acc = $acc -and $p } }
-    End { $acc }
+function All {
+    param ([Parameter(ValueFromPipeline)][Boolean[]] $ps)
+    begin { $acc = $true }
+    process { foreach ($p in $ps) { $acc = $acc -and $p } }
+    end { $acc }
 }
 
-Function Set-PathEnv {
-    Param (
+function Set-PathEnv {
+    param (
         [Parameter(Mandatory)][String[]] $patterns,
         [Parameter(Mandatory)][AllowEmptyString()][String] $path
     )
 
-    If (-not [String]::IsNullOrEmpty($path) -and -not (Test-Path $path)) {
+    if (-not [String]::IsNullOrEmpty($path) -and -not (Test-Path $path)) {
         Write-Warning "`"$path`" is not an existing path"
     }
-    $restPaths = $Env:Path -Split ';' | Where-Object { $v = $_; $patterns | ForEach-Object { $v -NotMatch $_ } | All }
+    $restPaths = $Env:Path -split ';' | Where-Object { $v = $_; $patterns | ForEach-Object { $v -notmatch $_ } | All }
     $newPaths = ,$path + $restPaths | Where-Object { -not [String]::IsNullOrEmpty($_) }
-    Set-Item Env:\Path -Value ($newPaths -Join ';')
+    Set-Item Env:\Path -Value ($newPaths -join ';')
 }
 
-Function Get-InstalledChocoItems {
-    Param (
+function Get-InstalledChocoItems {
+    param (
         [Parameter(Mandatory)][String] $App
     )
 
@@ -155,15 +155,15 @@ Function Get-InstalledChocoItems {
 # .SYNOPSIS
 #   Creats the ghcups.yaml with the default contents.
 function Write-GhcupsConfigTemplate {
-    Param (
+    param (
         [String] $Path = '.'
     )
 
     "# The key is the name you want, the value is the path of directory which contains ghc, ghci, etc.`nghc: {}`n`n# The same with ghc for cabal.`ncabal: {}" | Out-File (Join-Path $Path $localConfigName) -NoClobber
 }
 
-Function Get-ExePathsFromConfigs {
-    Param (
+function Get-ExePathsFromConfigs {
+    param (
         [Hashtable[]] $Configs,
         [String] $name
     )
@@ -172,21 +172,21 @@ Function Get-ExePathsFromConfigs {
       $Configs | `
       ForEach-Object { Get-HashtaleItem $name $_ } | `
       Where-Object { $null -ne $_ } | `
-      ForEach-Object -Begin { [Diagnostics.CodeAnalysis.SuppressMessageAttribute('UseDeclaredVarsMoreThanAssignments', 'paths')] $paths = @() } -Process { $paths += $_.Values } -End { $paths } | `
+      ForEach-Object -begin { [Diagnostics.CodeAnalysis.SuppressMessageAttribute('UseDeclaredVarsMoreThanAssignments', 'paths')] $paths = @() } -process { $paths += $_.Values } -end { $paths } | `
       Where-Object { -not [String]::IsNullOrEmpty($_) }
-    If ($null -eq $patterns) {
+    if ($null -eq $patterns) {
         @()
     }
     $patterns
 }
 
-Function Start-Choco {
-    Try {
+function Start-Choco {
+    try {
         choco @Args
     }
-    Catch [System.Management.Automation.CommandNotFoundException] {
+    catch [System.Management.Automation.CommandNotFoundException] {
         $choice = Read-Host '"choco" is not found. Will you install Chocoratey? [y/N]'
-        If ('y' -ne $choice) {
+        if ('y' -ne $choice) {
             return
         }
         Install-Choco
@@ -195,15 +195,15 @@ Function Start-Choco {
 
 # .SYNOPSIS
 #   Install the Chocolatey.
-Function Install-Choco {
-    If ((New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+function Install-Choco {
+    if ((New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
        # with administrative privileges
         Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
         return
     }
     Write-Host 'Installing Chocolatey...'
     $logFile = "$Env:TEMP\ghcups.log"
-    Start-Process `
+    Start-process `
         -FilePath powershell `
         -ArgumentList "-Command & { Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) | Tee-Object $logFile }" `
         -Verb RunAs `
@@ -214,8 +214,8 @@ Function Install-Choco {
 
 # GHC
 
-Function Get-ChocoGhc {
-    Param (
+function Get-ChocoGhc {
+    param (
         [Parameter(Mandatory)][String] $Ghc
     )
 
@@ -224,8 +224,8 @@ Function Get-ChocoGhc {
 
 # .SYNOPSIS
 #   Sets the version or variant of GHC to the Path environment variable of the current session.
-Function Set-Ghc {
-    Param (
+function Set-Ghc {
+    param (
         [Parameter(Mandatory)][String] $Ghc
     )
 
@@ -234,7 +234,7 @@ Function Set-Ghc {
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     [Hashtable] $cs = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $ghcDir = Get-HashtaleItem -Name 'ghc', $Ghc -Hashtable $cs
-    If ($null -eq $ghcDir) {
+    if ($null -eq $ghcDir) {
         $ghcDir = Get-ChocoGhc $Ghc
     }
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'ghc' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
@@ -244,31 +244,31 @@ Function Set-Ghc {
 
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
-Function Clear-Ghc {
+function Clear-Ghc {
     Set-PathEnv (Get-GhcPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
 }
 
 # .SYNOPSIS
 #   Installs the specified GHC with the Chocolatey.
-Function Install-Ghc {
+function Install-Ghc {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    Param (
+    param (
         [Parameter(Mandatory)][String] $Ghc,
         [Switch] $Set = $false
     )
 
     Start-Choco install ghc --version $Ghc --side-by-side
 
-    If ($Set) {
+    if ($Set) {
         Set-Ghc -Ghc $Ghc
     }
 }
 
 # .SYNOPSIS
 #   Uninstalls the specified GHC with the Chocolatey.
-Function Uninstall-Ghc {
+function Uninstall-Ghc {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    Param (
+    param (
         [Parameter(Mandatory)][String] $Ghc
     )
 
@@ -277,13 +277,13 @@ Function Uninstall-Ghc {
 
 # .SYNOPSIS
 #   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
-Function Show-Ghc {
+function Show-Ghc {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    Param ()
+    param ()
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
     $localConfigDir = $null
-    If (-not [String]::IsNullOrEmpty($localConfigPath)) {
+    if (-not [String]::IsNullOrEmpty($localConfigPath)) {
         $localConfigDir = Split-Path $localConfigPath -Parent
     }
     $localConfig = Get-Config $localConfigPath
@@ -292,25 +292,25 @@ Function Show-Ghc {
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $span = $false
     $ghcs = Get-HashtaleItem 'ghc' $config
-    If ($null -ne $ghcs -and 0 -lt $ghcs.Count) {
+    if ($null -ne $ghcs -and 0 -lt $ghcs.Count) {
         Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
-        ForEach ($k in $config.ghc.Keys) {
+        foreach ($k in $config.ghc.Keys) {
             Write-Output "    ${k}:    $($config.ghc[$k])"
         }
         $span = $true
     }
     $chocoGhcs = Get-InstalledChocoItems 'ghc'
-    If ($null -ne $chocoGhcs) {
-        If ($span) {
+    if ($null -ne $chocoGhcs) {
+        if ($span) {
             Write-Output ''
         }
         Write-Output 'Chocolatey (Installed)'
-        ForEach ($g in $chocoGhcs) {
+        foreach ($g in $chocoGhcs) {
             Write-Output "    ${g}:    $Env:ChocolateyInstall\lib\ghc.$g\tools\ghc-$g\bin"
         }
         $span = $true
     }
-    If ($span) {
+    if ($span) {
         Write-Output ''
     }
     Write-Output 'Chocolatey (Remote)'
@@ -319,8 +319,8 @@ Function Show-Ghc {
 
 # Cabal
 
-Function Get-ChocoCabal {
-    Param (
+function Get-ChocoCabal {
+    param (
         [Parameter(Mandatory)][String] $Cabal
     )
 
@@ -329,8 +329,8 @@ Function Get-ChocoCabal {
 
 # .SYNOPSIS
 #   Sets the version or variant of Cabal to the Path environment variable of the current session.
-Function Set-Cabal {
-    Param (
+function Set-Cabal {
+    param (
         [Parameter(Mandatory)][String] $Cabal
     )
 
@@ -338,7 +338,7 @@ Function Set-Cabal {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $cabalDir = Get-HashtaleItem -Name 'cabal', $Cabal -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
-    If ($null -eq $cabalDir) {
+    if ($null -eq $cabalDir) {
         $cabalDir = Get-ChocoCabal $Cabal
     }
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'cabal' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
@@ -348,31 +348,31 @@ Function Set-Cabal {
 
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
-Function Clear-Cabal {
+function Clear-Cabal {
     Set-PathEnv (Get-CabalPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
 }
 
 # .SYNOPSIS
 #   Installs the specified Cabal with the Chocolatey.
-Function Install-Cabal {
+function Install-Cabal {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    Param (
+    param (
         [Parameter(Mandatory)][String] $Cabal,
         [Switch] $Set = $false
     )
 
     Start-Choco install cabal --version $Cabal --side-by-side
 
-    If ($Set) {
+    if ($Set) {
         Set-Cabal -Cabal $Cabal -Method $Method
     }
 }
 
 # .SYNOPSIS
 #   Uninstalls the specified Cabal with the Chocolatey.
-Function Uninstall-Cabal {
+function Uninstall-Cabal {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    Param (
+    param (
         [Parameter(Mandatory)][String] $Cabal
     )
 
@@ -381,13 +381,13 @@ Function Uninstall-Cabal {
 
 # .SYNOPSIS
 #   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
-Function Show-Cabal {
+function Show-Cabal {
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    Param ()
+    param ()
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
     $localConfigDir = $null
-    If (-not [String]::IsNullOrEmpty($localConfigPath)) {
+    if (-not [String]::IsNullOrEmpty($localConfigPath)) {
         $localConfigDir = Split-Path $localConfigPath -Parent
     }
     $localConfig = Get-Config $localConfigPath
@@ -396,25 +396,25 @@ Function Show-Cabal {
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $span = $false
     $cabals = Get-HashtaleItem 'cabal' $config
-    If ($null -ne $cabals -and 0 -lt $cabals.Count) {
+    if ($null -ne $cabals -and 0 -lt $cabals.Count) {
         Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
-        ForEach ($k in $config.cabal.Keys) {
+        foreach ($k in $config.cabal.Keys) {
             Write-Output "    ${k}:    $($config.cabal[$k])"
         }
         $span = $true
     }
     $chocoCabals = Get-InstalledChocoItems 'cabal'
-    If ($null -ne $chocoCabals) {
-        If ($span) {
+    if ($null -ne $chocoCabals) {
+        if ($span) {
             Write-Output ''
         }
         Write-Output 'Chocolatey (Installed)'
-        ForEach ($g in $chocoCabals) {
+        foreach ($g in $chocoCabals) {
             Write-Output "    ${g}:    $Env:ChocolateyInstall\lib\cabal.$g\tools\cabal-$g\bin"
         }
         $span = $true
     }
-    If ($span) {
+    if ($span) {
         Write-Output ''
     }
     Write-Output 'Chocolatey (Remote)'
