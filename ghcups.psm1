@@ -293,27 +293,27 @@ Function Show-Ghc {
     $span = $false
     $ghcs = Get-HashtaleItem 'ghc' $config
     If ($null -ne $ghcs -and 0 -lt $ghcs.Count) {
-        Write-Host "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
+        Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         ForEach ($k in $config.ghc.Keys) {
-            Write-Host "    ${k}:    $($config.ghc[$k])"
+            Write-Output "    ${k}:    $($config.ghc[$k])"
         }
         $span = $true
     }
     $chocoGhcs = Get-InstalledChocoItems 'ghc'
     If ($null -ne $chocoGhcs) {
         If ($span) {
-            Write-Host
+            Write-Output ''
         }
-        Write-Host 'Chocolatey (Installed)'
+        Write-Output 'Chocolatey (Installed)'
         ForEach ($g in $chocoGhcs) {
-            Write-Host "    ${g}:    $Env:ChocolateyInstall\lib\ghc.$g\tools\ghc-$g\bin"
+            Write-Output "    ${g}:    $Env:ChocolateyInstall\lib\ghc.$g\tools\ghc-$g\bin"
         }
         $span = $true
     }
     If ($span) {
-        Write-Host
+        Write-Output ''
     }
-    Write-Host 'Chocolatey (Remote)'
+    Write-Output 'Chocolatey (Remote)'
     Start-Choco list ghc --by-id-only --all-versions | ForEach-Object { "    $_" }
 }
 
@@ -397,27 +397,27 @@ Function Show-Cabal {
     $span = $false
     $cabals = Get-HashtaleItem 'cabal' $config
     If ($null -ne $cabals -and 0 -lt $cabals.Count) {
-        Write-Host "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
+        Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         ForEach ($k in $config.cabal.Keys) {
-            Write-Host "    ${k}:    $($config.cabal[$k])"
+            Write-Output "    ${k}:    $($config.cabal[$k])"
         }
         $span = $true
     }
     $chocoCabals = Get-InstalledChocoItems 'cabal'
     If ($null -ne $chocoCabals) {
         If ($span) {
-            Write-Host
+            Write-Output ''
         }
-        Write-Host 'Chocolatey (Installed)'
+        Write-Output 'Chocolatey (Installed)'
         ForEach ($g in $chocoCabals) {
-            Write-Host "    ${g}:    $Env:ChocolateyInstall\lib\cabal.$g\tools\cabal-$g\bin"
+            Write-Output "    ${g}:    $Env:ChocolateyInstall\lib\cabal.$g\tools\cabal-$g\bin"
         }
         $span = $true
     }
     If ($span) {
-        Write-Host
+        Write-Output ''
     }
-    Write-Host 'Chocolatey (Remote)'
+    Write-Output 'Chocolatey (Remote)'
     Start-Choco list cabal --by-id-only --all-versions | ForEach-Object { "    $_" }
 }
 
