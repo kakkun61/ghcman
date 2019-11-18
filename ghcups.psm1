@@ -180,6 +180,38 @@ Function Get-ExePathsFromConfigs {
     $patterns
 }
 
+Function Start-Choco {
+    Try {
+        choco @Args
+    }
+    Catch [System.Management.Automation.CommandNotFoundException] {
+        $choice = Read-Host '"choco" is not found. Will you install Chocoratey? [y/N]'
+        If ('y' -ne $choice) {
+            return
+        }
+        Install-Choco
+    }
+}
+
+# .SYNOPSIS
+#   Install the Chocolatey.
+Function Install-Choco {
+    If ((New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+       # with administrative privileges
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+        return
+    }
+    Write-Host 'Installing Chocolatey...'
+    $logFile = "$Env:TEMP\ghcups.log"
+    Start-Process `
+        -FilePath powershell `
+        -ArgumentList "-Command & { Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) | Tee-Object $logFile }" `
+        -Verb RunAs `
+        -Wait
+    Write-Host "Log file is at `"$logFile`""
+    Write-Host 'Update Env:\Path or restart the PowerShell'
+}
+
 # GHC
 
 Function Get-ChocoGhc {
@@ -219,12 +251,13 @@ Function Clear-Ghc {
 # .SYNOPSIS
 #   Installs the specified GHC with the Chocolatey.
 Function Install-Ghc {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     Param (
         [Parameter(Mandatory)][String] $Ghc,
         [Switch] $Set = $false
     )
 
-    choco install ghc --version $Ghc --side-by-side
+    Start-Choco install ghc --version $Ghc --side-by-side
 
     If ($Set) {
         Set-Ghc -Ghc $Ghc
@@ -234,16 +267,20 @@ Function Install-Ghc {
 # .SYNOPSIS
 #   Uninstalls the specified GHC with the Chocolatey.
 Function Uninstall-Ghc {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     Param (
         [Parameter(Mandatory)][String] $Ghc
     )
 
-    choco uninstall ghc --version $Ghc
+    Start-Choco uninstall ghc --version $Ghc
 }
 
 # .SYNOPSIS
 #   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 Function Show-Ghc {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
+    Param ()
+
     $localConfigPath = Find-LocalConfigPath (Get-Location)
     $localConfigDir = $null
     If (-not [String]::IsNullOrEmpty($localConfigPath)) {
@@ -277,7 +314,7 @@ Function Show-Ghc {
         Write-Host
     }
     Write-Host 'Chocolatey (Remote)'
-    choco list ghc --by-id-only --all-versions | ForEach-Object { "    $_" }
+    Start-Choco list ghc --by-id-only --all-versions | ForEach-Object { "    $_" }
 }
 
 # Cabal
@@ -318,12 +355,13 @@ Function Clear-Cabal {
 # .SYNOPSIS
 #   Installs the specified Cabal with the Chocolatey.
 Function Install-Cabal {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     Param (
         [Parameter(Mandatory)][String] $Cabal,
         [Switch] $Set = $false
     )
 
-    choco install cabal --version $Cabal --side-by-side
+    Start-Choco install cabal --version $Cabal --side-by-side
 
     If ($Set) {
         Set-Cabal -Cabal $Cabal -Method $Method
@@ -333,16 +371,20 @@ Function Install-Cabal {
 # .SYNOPSIS
 #   Uninstalls the specified Cabal with the Chocolatey.
 Function Uninstall-Cabal {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     Param (
         [Parameter(Mandatory)][String] $Cabal
     )
 
-    choco uninstall cabal --version $Cabal
+    Start-Choco uninstall cabal --version $Cabal
 }
 
 # .SYNOPSIS
 #   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 Function Show-Cabal {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
+    Param ()
+
     $localConfigPath = Find-LocalConfigPath (Get-Location)
     $localConfigDir = $null
     If (-not [String]::IsNullOrEmpty($localConfigPath)) {
@@ -376,9 +418,22 @@ Function Show-Cabal {
         Write-Host
     }
     Write-Host 'Chocolatey (Remote)'
-    choco list cabal --by-id-only --all-versions | ForEach-Object { "    $_" }
+    Start-Choco list cabal --by-id-only --all-versions | ForEach-Object { "    $_" }
 }
 
 # Export
 
-Export-ModuleMember -Function 'Set-Ghc', 'Clear-Ghc', 'Install-Ghc', 'Uninstall-Ghc', 'Show-Ghc', 'Set-Cabal', 'Clear-Cabal', 'Install-Cabal', 'Uninstall-Cabal', 'Show-Cabal', 'Write-GhcupsConfigTemplate'
+Export-ModuleMember `
+    -Function `
+        'Set-Ghc', `
+        'Clear-Ghc', `
+        'Install-Ghc', `
+        'Uninstall-Ghc', `
+        'Show-Ghc', `
+        'Set-Cabal', `
+        'Clear-Cabal', `
+        'Install-Cabal', `
+        'Uninstall-Cabal', `
+        'Show-Cabal', `
+        'Write-GhcupsConfigTemplate', `
+        'Install-Choco'

@@ -86,3 +86,5 @@ cabal:
   - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 - `Write-GhcupsConfigTemplate`
   - Creats the ghcups.yaml with the default contents.
+- `Install-Choco`
+  - Install the Chocolatey.
