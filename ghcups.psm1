@@ -245,7 +245,12 @@ function Set-Ghc {
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
 function Clear-Ghc {
-    Set-PathEnv (Get-GhcPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
+    $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
+    $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
+    $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
+    $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'ghc' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
+    $patterns += $ghcPathPattern
+    Set-PathEnv $patterns $null
 }
 
 # .SYNOPSIS
@@ -349,7 +354,12 @@ function Set-Cabal {
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
 function Clear-Cabal {
-    Set-PathEnv (Get-CabalPatterns (Get-Config (Find-LocalConfigPath (Get-Location))), (Get-Config $globalConfigPath)) $null
+    $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
+    $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
+    $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
+    $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'cabal' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
+    $patterns += $cabalPathPattern
+    Set-PathEnv $patterns $null
 }
 
 # .SYNOPSIS
