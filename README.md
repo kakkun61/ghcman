@@ -1,4 +1,4 @@
-# ghcups; ghcup for PowerShell
+# ghcups; ghcup for PowerShell on Windows
 
 [![GitHub Actions: windows](https://github.com/kakkun61/ghcups/workflows/windows/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Awindows) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcups.svg)](https://www.powershellgallery.com/packages/ghcups/)
 
