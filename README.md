@@ -2,6 +2,10 @@
 
 [![GitHub Actions: windows](https://github.com/kakkun61/ghcups/workflows/windows/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Awindows) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcups.svg)](https://www.powershellgallery.com/packages/ghcups/)
 
+## Dependency
+
+This depends on Chocolatey, but this installs it automatically if there is no `choco`.
+
 ## Install
 
 Download and load ghcups to PowerShell.
