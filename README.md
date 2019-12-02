@@ -77,7 +77,7 @@ cabal:
 - `Clear-Ghc`
   - Removes all GHC values from the Path environment variable of the current session.
 - `Show-Ghc`
-  - Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
+  - Shows the GHCs which are specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 - `Install-Cabal`
   - Installs the specified Cabal with the Chocolatey.
 - `Uninstall-Cabal`
@@ -89,6 +89,6 @@ cabal:
 - `Show-Cabal`
   - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
 - `Write-GhcupsConfigTemplate`
-  - Creats the ghcups.yaml with the default contents.
+  - Creates the ghcups.yaml with the default contents.
 - `Install-Choco`
   - Installs the Chocolatey.
