@@ -87,4 +87,4 @@ cabal:
 - `Write-GhcupsConfigTemplate`
   - Creats the ghcups.yaml with the default contents.
 - `Install-Choco`
-  - Install the Chocolatey.
+  - Installs the Chocolatey.
