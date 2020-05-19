@@ -1,5 +1,11 @@
 # Change log
 
+## 2.1
+
+Fix the problem that `Show-*` and `Clear-*` ignore configurations other than the local one.
+
+Add the feature of installation of the Chocolatey.
+
 ## 2.0.1
 
 Fix README about #3.
