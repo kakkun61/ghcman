@@ -1,5 +1,21 @@
 # Change log
 
+## 3.0
+
+### Breaking changes
+
+The ghcups ≧ 3.0 cannot uninstall apps which is installed with the ghcups < 3.0. Please uninstall apps before upgrading the ghcups, or use the Chocolatey manually.
+
+`-Ghc` and `-Cabal` options are renamed to `-Name` or `-Version`.
+
+### Others
+
+Now no dependencies on the Chocolatey.
+
+Gets to depend on the 7-Zip.
+
+Supports 32-bit Windows.
+
 ## 2.1
 
 Fix the problem that `Show-*` and `Clear-*` ignore configurations other than the local one.
