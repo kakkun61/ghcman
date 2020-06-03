@@ -147,6 +147,10 @@ function Get-InstalledItems {
         [Parameter(Mandatory)][String] $App
     )
 
+    if (-not (Test-Path (Get-GhcupsInstall))) {
+        @()
+        return
+    }
     $path = "$(Get-GhcupsInstall)\$App-"
     Get-Item "$path*" | ForEach-Object { ([String]$_).Remove(0, $path.Length) }
 }
