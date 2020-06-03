@@ -8,6 +8,7 @@ Set-Variable originalPath -Option Constant -Value "$Env:Path"
 Set-Variable originalProgramData -Option Constant -Value "$Env:ProgramData"
 Set-Variable originalAPPDATA -Option Constant -Value "$Env:APPDATA"
 Set-Variable originalPWD -Option Constant -Value "$PWD"
+Set-Variable originalGhcupsInstall -Option Constant -Value "$Env:GhcupsInstall"
 
 function New-TemporaryDirectory {
     $parent = [System.IO.Path]::GetTempPath()
@@ -97,5 +98,6 @@ Describe "Set-Ghc" {
         Set-Item Env:\Path -Value $originalPath
         Set-Item Env:\ProgramData -Value $originalProgramData
         Set-Item Env:\APPDATA -Value $originalAPPDATA
+        Set-Item Env:\GhcupsInstall -Value $originalGhcupsInstall
     }
 }
