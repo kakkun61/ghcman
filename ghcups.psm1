@@ -5,8 +5,6 @@ Set-StrictMode -Version Latest
 Set-Variable systemGlobalDataPath -Option Constant -Value "$Env:ProgramData\ghcups"
 Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcups"
 Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
-Set-Variable ghcPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\ghc\.' + $versionPattern + '\\tools\\ghc-' + $versionPattern + '\\bin')
-Set-Variable cabalPathPattern -Option Constant -Value ([Regex]::Escape($Env:ChocolateyInstall) + '\\lib\\cabal\.' + $versionPattern + '\\tools\\cabal-' + $versionPattern)
 Set-Variable localConfigName -Option Constant -Value 'ghcups.yaml'
 Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 
@@ -144,12 +142,12 @@ function Set-PathEnv {
     Set-Item Env:\Path -Value ($newPaths -join ';')
 }
 
-function Get-InstalledChocoItems {
+function Get-InstalledItems {
     param (
         [Parameter(Mandatory)][String] $App
     )
 
-    $path = "$Env:ChocolateyInstall\lib\$App."
+    $path = "$(Get-GhcupsInstall)\$App-"
     Get-Item "$path*" | ForEach-Object { ([String]$_).Remove(0, $path.Length) }
 }
 
@@ -181,115 +179,132 @@ function Get-ExePathsFromConfigs {
     $patterns
 }
 
-function Start-Choco {
-    try {
-        choco @Args
-    }
-    catch [System.Management.Automation.CommandNotFoundException] {
-        $choice = Read-Host '"choco" is not found. Will you install Chocoratey? [y/N]'
-        if ('y' -ne $choice) {
-            return
-        }
-        Install-Choco
-    }
-}
-
-# .SYNOPSIS
-#   Install the Chocolatey.
-function Install-Choco {
-    if ((New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-       # with administrative privileges
-        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+function Get-GhcupsInstall {
+    param ()
+    if ([String]::IsNullOrEmpty($Env:GhcupsInstall)) {
+        $userGlobalDataPath
         return
     }
-    Write-Host 'Installing Chocolatey...'
-    $logFile = "$Env:TEMP\ghcups.log"
-    Start-process `
-        -FilePath powershell `
-        -ArgumentList "-Command & { Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1')) | Tee-Object $logFile }" `
-        -Verb RunAs `
-        -Wait
-    Write-Host "Log file is at `"$logFile`""
-    Write-Host 'Update Env:\Path or restart the PowerShell'
+    $Env:GhcupsInstall
 }
 
 # GHC
 
-function Get-ChocoGhc {
+function Get-GhcupsGhc {
     param (
-        [Parameter(Mandatory)][String] $Ghc
+        [Parameter(Mandatory)][String] $Version
     )
 
-    "$Env:ChocolateyInstall\lib\ghc.$Ghc\tools\ghc-$Ghc\bin"
+    "$(Get-GhcupsInstall)\ghc-$Version\bin"
+}
+
+function Get-GhcPathPattern {
+    param ()
+    [Regex]::Escape((Get-GhcupsInstall)) + '\\ghc-' + $versionPattern + '\\bin'
 }
 
 # .SYNOPSIS
 #   Sets the version or variant of GHC to the Path environment variable of the current session.
 function Set-Ghc {
     param (
-        [Parameter(Mandatory)][String] $Ghc
+        [Parameter(Mandatory)][String] $Name
     )
+
+    $ErrorActionPreference = 'Stop'
 
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     [Hashtable] $cs = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $ghcDir = Get-HashtaleItem -Name 'ghc', $Ghc -Hashtable $cs
+    $ghcDir = Get-HashtaleItem -Name 'ghc', $Name -Hashtable $cs
     if ([String]::IsNullOrEmpty($ghcDir)) {
-        if ($Ghc -notmatch ('\A' + $versionPattern + '\Z')) {
-            Write-Error "No sutch GHC: $Ghc"
+        if ($Name -notmatch ('\A' + $versionPattern + '\Z')) {
+            Write-Error "No sutch GHC: $Name"
             return
         }
-        $ghcDir = Get-ChocoGhc $Ghc
+        $ghcDir = Get-GhcupsGhc $Name
     }
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'ghc' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
-    $patterns += $ghcPathPattern
+    $patterns += Get-GhcPathPattern
     Set-PathEnv $patterns $ghcDir
 }
 
 # .SYNOPSIS
 #   Removes all GHC values from the Path environment variable of the current session.
 function Clear-Ghc {
+    $ErrorActionPreference = 'Stop'
+
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'ghc' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
-    $patterns += $ghcPathPattern
+    $patterns += Get-GhcPathPattern
     Set-PathEnv $patterns $null
 }
 
 # .SYNOPSIS
-#   Installs the specified GHC with the Chocolatey.
+#   Installs the specified GHC.
 function Install-Ghc {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     param (
-        [Parameter(Mandatory)][String] $Ghc,
-        [Switch] $Set = $false
+        [Parameter(Mandatory)][String] $Version,
+        [Switch] $Set = $false,
+        [Switch] $Force = $false
     )
 
-    Start-Choco install ghc --version $Ghc --side-by-side
+    $ErrorActionPreference = 'Stop'
+
+    if (Test-Path "$(Get-GhcupsInstall)\ghc-$Version") {
+        if ($Force) {
+            Uninstall-Ghc $Version
+        }
+        else {
+            $choice = Read-Host "GHC $Version looks already installed. Do you want to reinstall? [y/N]"
+            if ('y' -ne $choice) {
+                return
+            }
+            Uninstall-Ghc $Version
+        }
+    }
+    $tempDir = [System.IO.Path]::GetTempPath()
+    $fileName = "ghc-$Version-x86_64-unknown-mingw32"
+    if (Test-Path "$tempDir$fileName.tar.xz") {
+        Write-Host "A downloaded archive file is found: $tempDir$fileName.tar.xz"
+        $choice = Read-Host "Do you want to use this? [y/N]"
+        if ('y' -ne $choice) {
+            Remove-Item "$tempDir$fileName.tar.xz"
+            (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
+        }
+    }
+    else {
+        (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
+    }
+    if (Test-Path "$tempDir$fileName.tar") {
+        Remove-Item "$tempDir$fileName.tar"
+    }
+    7z x "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
+    7z x "-o$(Get-GhcupsInstall)" "$tempDir$fileName.tar"
 
     if ($Set) {
-        Set-Ghc -Ghc $Ghc
+        Set-Ghc -Ghc $Version
     }
 }
 
 # .SYNOPSIS
-#   Uninstalls the specified GHC with the Chocolatey.
+#   Uninstalls the specified GHC.
 function Uninstall-Ghc {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     param (
-        [Parameter(Mandatory)][String] $Ghc
+        [Parameter(Mandatory)][String] $Version
     )
 
-    Start-Choco uninstall ghc --version $Ghc
+    $ErrorActionPreference = 'Stop'
+
+    Remove-Item -Recurse -Force "$(Get-GhcupsInstall)\ghc-$Version"
 }
 
 # .SYNOPSIS
-#   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
+#   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
 function Show-Ghc {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    param ()
+    $ErrorActionPreference = 'Stop'
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
     $localConfigDir = $null
@@ -301,108 +316,139 @@ function Show-Ghc {
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $span = $false
-    $ghcs = Get-HashtaleItem 'ghc' $config
-    if ($null -ne $ghcs -and 0 -lt $ghcs.Count) {
+    $names = Get-HashtaleItem 'ghc' $config
+    if ($null -ne $names -and 0 -lt $names.Count) {
         Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         foreach ($k in $config.ghc.Keys) {
             Write-Output "    ${k}:    $($config.ghc[$k])"
         }
         $span = $true
     }
-    $chocoGhcs = Get-InstalledChocoItems 'ghc'
-    if ($null -ne $chocoGhcs) {
+    $versions = Get-InstalledItems 'ghc'
+    if ($null -ne $versions) {
         if ($span) {
             Write-Output ''
         }
-        Write-Output 'Chocolatey (Installed)'
-        foreach ($g in $chocoGhcs) {
-            Write-Output "    ${g}:    $Env:ChocolateyInstall\lib\ghc.$g\tools\ghc-$g\bin"
+        Write-Output 'Installed'
+        foreach ($v in $versions) {
+            Write-Output "    ${v}:$(' ' * (10 - $v.Length))$(Get-GhcupsInstall)\ghc-$v\bin"
         }
         $span = $true
     }
-    if ($span) {
-        Write-Output ''
-    }
-    Write-Output 'Chocolatey (Remote)'
-    Start-Choco list ghc --by-id-only --all-versions | ForEach-Object { "    $_" }
+    # TODO: Show non-installed GHCs
 }
 
 # Cabal
 
-function Get-ChocoCabal {
+function Get-GhcupsCabal {
     param (
-        [Parameter(Mandatory)][String] $Cabal
+        [Parameter(Mandatory)][String] $Version
     )
 
-    "$Env:ChocolateyInstall\lib\cabal.$Cabal\tools\cabal-$Cabal"
+    "$(Get-GhcupsInstall)\cabal-$Version"
+}
+
+function Get-CabalPathPattern {
+    [Regex]::Escape((Get-GhcupsInstall)) + '\\cabal-' + $versionPattern
 }
 
 # .SYNOPSIS
 #   Sets the version or variant of Cabal to the Path environment variable of the current session.
 function Set-Cabal {
     param (
-        [Parameter(Mandatory)][String] $Cabal
+        [Parameter(Mandatory)][String] $Name
     )
+
+    $ErrorActionPreference = 'Stop'
 
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
-    $cabalDir = Get-HashtaleItem -Name 'cabal', $Cabal -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
+    $cabalDir = Get-HashtaleItem -Name 'cabal', $Name -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
     if ([String]::IsNullOrEmpty($cabalDir)) {
-        if ($Cabal -notmatch ('\A' + $versionPattern + '\Z')) {
-            Write-Error "No sutch Cabal: $Cabal"
+        if ($Name -notmatch ('\A' + $versionPattern + '\Z')) {
+            Write-Error "No sutch Cabal: $Name"
             return
         }
-        $cabalDir = Get-ChocoCabal $Cabal
+        $cabalDir = Get-GhcupsCabal $Name
     }
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'cabal' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
-    $patterns += $cabalPathPattern
+    $patterns += Get-CabalPathPattern
     Set-PathEnv $patterns $cabalDir
 }
 
 # .SYNOPSIS
 #   Removes all Cabal values from the Path environment variable of the current session.
 function Clear-Cabal {
+    $ErrorActionPreference = 'Stop'
+
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $patterns = Get-ExePathsFromConfigs $localConfig, $userGlobalConfig, $systemGlobalConfig 'cabal' | ForEach-Object { '\A' + [Regex]::Escape($_) + '\Z' }
-    $patterns += $cabalPathPattern
+    $patterns += Get-CabalPathPattern
     Set-PathEnv $patterns $null
 }
 
 # .SYNOPSIS
-#   Installs the specified Cabal with the Chocolatey.
+#   Installs the specified Cabal.
 function Install-Cabal {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     param (
-        [Parameter(Mandatory)][String] $Cabal,
-        [Switch] $Set = $false
+        [Parameter(Mandatory)][String] $Version,
+        [Switch] $Set = $false,
+        [Switch] $Force = $false
     )
 
-    Start-Choco install cabal --version $Cabal --side-by-side
+    $ErrorActionPreference = 'Stop'
+
+    if (Test-Path "$(Get-GhcupsInstall)\cabal-$Version") {
+        if ($Force) {
+            Uninstall-Cabal $Version
+        }
+        else {
+            $choice = Read-Host "Cabal $Version looks already installed. Do you want to reinstall? [y/N]"
+            if ('y' -ne $choice) {
+                return
+            }
+            Uninstall-Cabal $Version
+        }
+    }
+    $tempDir = [System.IO.Path]::GetTempPath()
+    $fileName = "cabal-install-$Version-x86_64-unknown-mingw32.zip"
+    if (Test-Path "$tempDir$fileName") {
+        Write-Host "A downloaded archive file is found: $tempDir$fileName"
+        $choice = Read-Host "Do you want to use this? [y/N]"
+        if ('y' -ne $choice) {
+            Remove-Item "$tempDir$fileName"
+            (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~cabal/cabal-install-$Version/$fileName", "$tempDir$fileName")
+        }
+    }
+    else {
+        (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~cabal/cabal-install-$Version/$fileName", "$tempDir$fileName")
+    }
+    Expand-Archive "$tempDir$fileName" "$(Get-GhcupsInstall)\cabal-$Version"
 
     if ($Set) {
-        Set-Cabal -Cabal $Cabal -Method $Method
+        Set-Cabal -Cabal $Version
     }
 }
 
 # .SYNOPSIS
-#   Uninstalls the specified Cabal with the Chocolatey.
+#   Uninstalls the specified Cabal.
 function Uninstall-Cabal {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
     param (
-        [Parameter(Mandatory)][String] $Cabal
+        [Parameter(Mandatory)][String] $Version
     )
 
-    Start-Choco uninstall cabal --version $Cabal
+    $ErrorActionPreference = 'Stop'
+
+    Remove-Item -Recurse -Force "$(Get-GhcupsInstall)\cabal-$Version"
 }
 
 # .SYNOPSIS
-#   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
+#   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not installed yet.
 function Show-Cabal {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPositionalParameters', 'Start-Choco')]
-    param ()
+    $ErrorActionPreference = 'Stop'
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
     $localConfigDir = $null
@@ -414,30 +460,29 @@ function Show-Cabal {
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
     $span = $false
-    $cabals = Get-HashtaleItem 'cabal' $config
-    if ($null -ne $cabals -and 0 -lt $cabals.Count) {
+    $names = Get-HashtaleItem 'cabal' $config
+    if ($null -ne $names -and 0 -lt $names.Count) {
         Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         foreach ($k in $config.cabal.Keys) {
             Write-Output "    ${k}:    $($config.cabal[$k])"
         }
         $span = $true
     }
-    $chocoCabals = Get-InstalledChocoItems 'cabal'
-    if ($null -ne $chocoCabals) {
+    $versions = InstalledItems 'cabal'
+    if ($null -ne $versions) {
         if ($span) {
             Write-Output ''
         }
-        Write-Output 'Chocolatey (Installed)'
-        foreach ($g in $chocoCabals) {
-            Write-Output "    ${g}:    $Env:ChocolateyInstall\lib\cabal.$g\tools\cabal-$g\bin"
+        Write-Output 'Installed'
+        foreach ($v in $versions) {
+            Write-Output "    ${v}:$(' ' * (10 - $v.Length))$(Get-GhcupsInstall)\cabal-$v\bin"
         }
         $span = $true
     }
     if ($span) {
         Write-Output ''
     }
-    Write-Output 'Chocolatey (Remote)'
-    Start-Choco list cabal --by-id-only --all-versions | ForEach-Object { "    $_" }
+    # TODO: Show non-installed Cabals
 }
 
 # Export
@@ -454,5 +499,4 @@ Export-ModuleMember `
         'Install-Cabal', `
         'Uninstall-Cabal', `
         'Show-Cabal', `
-        'Write-GhcupsConfigTemplate', `
-        'Install-Choco'
+        'Write-GhcupsConfigTemplate'

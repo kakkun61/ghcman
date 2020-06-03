@@ -4,7 +4,7 @@
 
 ## Dependency
 
-This depends on Chocolatey, but this installs it automatically if there is no `choco`.
+This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/files/7-Zip/).
 
 ## Install
 
@@ -66,29 +66,29 @@ cabal:
 
 `Write-GhcupsConfigTemplate` function creates _ghcups.yaml_ with the template.
 
+You can specify the directory which GHCs and Cabals are installed at with _`$Env:GhcupsInstall`_. The default is _`$Env:APPDATA`\ghcups_.
+
 ## Functions
 
 - `Install-Ghc`
-  - Installs the specified GHC with the Chocolatey.
+  - Installs the specified GHC.
 - `Uninstall-Ghc`
-  - Uninstalls the specified GHC with the Chocolatey.
+  - Uninstalls the specified GHC.
 - `Set-Ghc`
   - Sets the version or variant of GHC to the Path environment variable of the current session.
 - `Clear-Ghc`
   - Removes all GHC values from the Path environment variable of the current session.
 - `Show-Ghc`
-  - Shows the GHCs which are specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
+  - Shows the GHCs which are specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed..
 - `Install-Cabal`
-  - Installs the specified Cabal with the Chocolatey.
+  - Installs the specified Cabal.
 - `Uninstall-Cabal`
-  - Uninstalls the specified Cabal with the Chocolatey.
+  - Uninstalls the specified Cabal.
 - `Set-Cabal`
   - Sets the version or variant of Cabal to the Path environment variable of the current session.
 - `Clear-Cabal`
   - Removes all Cabal values from the Path environment variable of the current session.
 - `Show-Cabal`
-  - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Chocolatey and which is hosted on the Chocolatey repository.
+  - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed..
 - `Write-GhcupsConfigTemplate`
   - Creates the ghcups.yaml with the default contents.
-- `Install-Choco`
-  - Installs the Chocolatey.

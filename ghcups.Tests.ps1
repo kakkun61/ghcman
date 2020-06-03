@@ -26,17 +26,19 @@ Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
 $tempPWD = New-TemporaryDirectory
 Set-Location $tempPWD
 
+$Env:GhcupsInstall = $tempPWD
+
 Describe "Set-Ghc" {
     It "Add 8.8.1 to the empty path" {
         $Env:Path = ''
         Set-Ghc 8.8.1
-        $Env:Path | Should -Be "$Env:ChocolateyInstall\lib\ghc.8.8.1\tools\ghc-8.8.1\bin"
+        $Env:Path | Should -Be "$tempPWD\ghc-8.8.1\bin"
     }
 
     It "Add 8.8.1 to the path which contains 8.6.5" {
-        $Env:Path = "$Env:ChocolateyInstall\lib\ghc.8.6.5\tools\ghc-8.6.5\bin"
+        $Env:Path = "$tempPWD\ghc-8.6.5\bin"
         Set-Ghc 8.8.1
-        $Env:Path | Should -Be "$Env:ChocolateyInstall\lib\ghc.8.8.1\tools\ghc-8.8.1\bin"
+        $Env:Path | Should -Be "$tempPWD\ghc-8.8.1\bin"
     }
 
     It "Add foo of config to the empty path" {
