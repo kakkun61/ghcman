@@ -188,6 +188,16 @@ function Get-GhcupsInstall {
     $Env:GhcupsInstall
 }
 
+# only x86_64, i386 supported
+function Get-Architecture {
+    if ([Environment]::Is64BitOperatingSystem) {
+        'x86_64'
+        return
+    }
+    'i386'
+    return
+}
+
 # GHC
 
 function Get-GhcupsGhc {
@@ -266,7 +276,8 @@ function Install-Ghc {
         }
     }
     $tempDir = [System.IO.Path]::GetTempPath()
-    $fileName = "ghc-$Version-x86_64-unknown-mingw32"
+    $arch = Get-Architecture
+    $fileName = "ghc-$Version-$arch-unknown-mingw32"
     if (Test-Path "$tempDir$fileName.tar.xz") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName.tar.xz"
         $choice = Read-Host "Do you want to use this? [y/N]"
@@ -315,27 +326,34 @@ function Show-Ghc {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $span = $false
     $names = Get-HashtaleItem 'ghc' $config
-    if ($null -ne $names -and 0 -lt $names.Count) {
+    if ($null -eq $names -or 0 -eq $names.Count) {
+        Write-Output 'No configurations found'
+    }
+    else {
         Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         foreach ($k in $config.ghc.Keys) {
             Write-Output "    ${k}:    $($config.ghc[$k])"
         }
-        $span = $true
     }
+    Write-Output ''
+    Write-Output 'Installed'
     $versions = Get-InstalledItems 'ghc'
-    if ($null -ne $versions) {
-        if ($span) {
-            Write-Output ''
-        }
-        Write-Output 'Installed'
+    if ($null -eq $versions) {
+        Write-Output '    None'
+    }
+    else {
         foreach ($v in $versions) {
             Write-Output "    ${v}:$(' ' * (10 - $v.Length))$(Get-GhcupsInstall)\ghc-$v\bin"
         }
-        $span = $true
     }
-    # TODO: Show non-installed GHCs
+    Write-Output ''
+    Write-Output 'Supported (You can specify unsupported versions too)'
+    $arch = Get-Architecture
+    $versions = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    foreach ($v in $versions) {
+        Write-Output "    ${v}"
+    }
 }
 
 # Cabal
@@ -414,7 +432,8 @@ function Install-Cabal {
         }
     }
     $tempDir = [System.IO.Path]::GetTempPath()
-    $fileName = "cabal-install-$Version-x86_64-unknown-mingw32.zip"
+    $arch = Get-Architecture
+    $fileName = "cabal-install-$Version-$arch-unknown-mingw32.zip"
     if (Test-Path "$tempDir$fileName") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName"
         $choice = Read-Host "Do you want to use this? [y/N]"
@@ -459,30 +478,34 @@ function Show-Cabal {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $span = $false
     $names = Get-HashtaleItem 'cabal' $config
-    if ($null -ne $names -and 0 -lt $names.Count) {
+    if ($null -eq $names -or 0 -eq $names.Count) {
+        Write-Output 'No configurations found'
+    }
+    else {
         Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
         foreach ($k in $config.cabal.Keys) {
             Write-Output "    ${k}:    $($config.cabal[$k])"
         }
-        $span = $true
     }
-    $versions = InstalledItems 'cabal'
-    if ($null -ne $versions) {
-        if ($span) {
-            Write-Output ''
-        }
-        Write-Output 'Installed'
+    Write-Output ''
+    Write-Output 'Installed'
+    $versions = Get-InstalledItems 'cabal'
+    if ($null -eq $versions) {
+        Write-Output '    None'
+    }
+    else {
         foreach ($v in $versions) {
             Write-Output "    ${v}:$(' ' * (10 - $v.Length))$(Get-GhcupsInstall)\cabal-$v\bin"
         }
-        $span = $true
     }
-    if ($span) {
-        Write-Output ''
+    Write-Output ''
+    Write-Output 'Supported (You can specify unsupported versions too)'
+    $arch = Get-Architecture
+    $versions = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    foreach ($v in $versions) {
+        Write-Output "    ${v}"
     }
-    # TODO: Show non-installed Cabals
 }
 
 # Export
