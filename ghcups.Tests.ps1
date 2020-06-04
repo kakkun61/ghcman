@@ -4,31 +4,6 @@ Set-StrictMode -Version Latest
 
 Import-Module powershell-yaml
 
-Set-Variable originalPath -Option Constant -Value "$Env:Path"
-Set-Variable originalProgramData -Option Constant -Value "$Env:ProgramData"
-Set-Variable originalAPPDATA -Option Constant -Value "$Env:APPDATA"
-Set-Variable originalPWD -Option Constant -Value "$PWD"
-Set-Variable originalGhcupsInstall -Option Constant -Value "$Env:GhcupsInstall"
-
-function New-TemporaryDirectory {
-    $parent = [System.IO.Path]::GetTempPath()
-    [String] $name = [System.Guid]::NewGuid()
-    New-Item -ItemType Directory -Path (Join-Path $parent $name)
-}
-
-$Env:ProgramData = New-TemporaryDirectory
-New-Item -ItemType Directory -Path "$Env:ProgramData\ghcups"
-
-$Env:APPDATA = New-TemporaryDirectory
-New-Item -ItemType Directory -Path "$Env:APPDATA\ghcups"
-
-Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
-
-$tempPWD = New-TemporaryDirectory
-Set-Location $tempPWD
-
-$Env:GhcupsInstall = $tempPWD
-
 Describe "Set-Ghc" {
     It "Add 8.8.1 to the empty path" {
         $Env:Path = ''
@@ -87,8 +62,31 @@ Describe "Set-Ghc" {
         $Env:Path | Should -Be 'C:\Users'
     }
 
-    AfterEach {
-        Remove-Item 'ghcups.yaml' -ErrorAction Ignore
+    BeforeAll {
+        Set-Variable originalPath -Option Constant -Value "$Env:Path"
+        Set-Variable originalProgramData -Option Constant -Value "$Env:ProgramData"
+        Set-Variable originalAPPDATA -Option Constant -Value "$Env:APPDATA"
+        Set-Variable originalPWD -Option Constant -Value "$PWD"
+        Set-Variable originalGhcupsInstall -Option Constant -Value "$Env:GhcupsInstall"
+
+        function New-TemporaryDirectory {
+            $parent = [System.IO.Path]::GetTempPath()
+            [String] $name = [System.Guid]::NewGuid()
+            New-Item -ItemType Directory -Path (Join-Path $parent $name)
+        }
+
+        $Env:ProgramData = New-TemporaryDirectory
+        New-Item -ItemType Directory -Path "$Env:ProgramData\ghcups"
+
+        $Env:APPDATA = New-TemporaryDirectory
+        New-Item -ItemType Directory -Path "$Env:APPDATA\ghcups"
+
+        Import-Module -Force (Join-Path "$PSScriptRoot" 'ghcups.psm1')
+
+        $tempPWD = New-TemporaryDirectory
+        Set-Location $tempPWD
+
+        $Env:GhcupsInstall = $tempPWD
     }
 
     AfterAll {
@@ -99,5 +97,9 @@ Describe "Set-Ghc" {
         Set-Item Env:\ProgramData -Value $originalProgramData
         Set-Item Env:\APPDATA -Value $originalAPPDATA
         Set-Item Env:\GhcupsInstall -Value $originalGhcupsInstall
+    }
+
+    AfterEach {
+        Remove-Item 'ghcups.yaml' -ErrorAction Ignore
     }
 }

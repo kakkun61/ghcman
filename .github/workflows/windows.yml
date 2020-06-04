@@ -17,7 +17,7 @@ jobs:
       shell: powershell
       run: |
         $ErrorActionPreference = 'Stop'
-        Install-Module Pester -Force -SkipPublisherCheck -MaximumVersion 4.10.1
+        Install-Module Pester -Force -SkipPublisherCheck -RequiredVersion 5.0.2
     - name: Test
       shell: powershell
       run: |
@@ -39,7 +39,53 @@ jobs:
       shell: pwsh
       run: |
         $ErrorActionPreference = 'Stop'
-        Install-Module Pester -Force -SkipPublisherCheck -MaximumVersion 4.10.1
+        Install-Module Pester -Force -SkipPublisherCheck -RequiredVersion 5.0.2
+    - name: Test
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module Pester
+        Invoke-Pester -EnableExit
+
+  test-powershell-new:
+    name: Test on PowerShell on Windows with the newest Pester
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install powershell-yaml
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module powershell-yaml -Force
+    - name: Install Pester
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module Pester -Force -SkipPublisherCheck
+    - name: Test
+      shell: powershell
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module Pester
+        Invoke-Pester -EnableExit
+
+  test-pwsh-new:
+    name: Test on PowerShell Core on Windows with the newest Pester
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install powershell-yaml
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module powershell-yaml -Force
+    - name: Install Pester
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module Pester -Force -SkipPublisherCheck
     - name: Test
       shell: pwsh
       run: |
