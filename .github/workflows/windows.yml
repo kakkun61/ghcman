@@ -17,7 +17,7 @@ jobs:
       shell: powershell
       run: |
         $ErrorActionPreference = 'Stop'
-        Install-Module Pester -Force -SkipPublisherCheck
+        Install-Module Pester -Force -SkipPublisherCheck -MaximumVersion 4.10.1
     - name: Test
       shell: powershell
       run: |
@@ -39,7 +39,7 @@ jobs:
       shell: pwsh
       run: |
         $ErrorActionPreference = 'Stop'
-        Install-Module Pester -Force -SkipPublisherCheck
+        Install-Module Pester -Force -SkipPublisherCheck -MaximumVersion 4.10.1
     - name: Test
       shell: pwsh
       run: |
