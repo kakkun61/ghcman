@@ -66,6 +66,8 @@ cabal:
 
 `Write-GhcupsConfigTemplate` function creates _ghcups.yaml_ with the template.
 
+When you want to check the loaded configuration, use `Show-GhcupsConfig` function.
+
 You can specify the directory which GHCs and Cabals are installed at with _`$Env:GhcupsInstall`_. The default is _`$Env:APPDATA`\ghcups_.
 
 ## Functions
@@ -92,3 +94,5 @@ You can specify the directory which GHCs and Cabals are installed at with _`$Env
   - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed..
 - `Write-GhcupsConfigTemplate`
   - Creates the ghcups.yaml with the default contents.
+- `Show-GhcupsConfig`
+  - Shows the loaded configurations which are re-generated to YAML.

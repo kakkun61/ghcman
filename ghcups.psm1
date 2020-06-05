@@ -222,6 +222,17 @@ function Write-StatusLine {
     Write-Host
 }
 
+function Write-Quote {
+    param (
+        [Parameter(Mandatory)][AllowNull()][AllowEmptyString()][String] $Content
+    )
+
+    foreach ($line in $Content -Split [Environment]::NewLine) {
+        Write-Host '     | ' -ForegroundColor Gray -NoNewline
+        Write-Host $line
+    }
+}
+
 # GHC
 
 function Get-GhcupsGhc {
@@ -566,6 +577,69 @@ function Show-Cabal {
     $result
 }
 
+# .SYNOPSIS
+#   Shows the loaded configurations which are re-generated to YAML.
+function Show-GhcupsConfig {
+    $ErrorActionPreference = 'Stop'
+
+    $localConfigPath = Find-LocalConfigPath (Get-Location)
+    $localConfig = Get-Config $localConfigPath
+
+    $userGlobalConfigPath = Join-Path $userGlobalDataPath $globalConfigName
+    $userGlobalConfig = Get-Config $userGlobalConfigPath
+
+    $systemGlobalConfigPath = Join-Path $systemGlobalDataPath $globalConfigName
+    $systemGlobalConfig = Get-Config $systemGlobalConfigPath
+
+    $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
+
+    if ([String]::IsNullOrEmpty($localConfigPath)) {
+        Write-Host "Local config:"
+        Write-Host "    Not found"
+    }
+    elseif ($null -eq $localConfig) {
+        Write-Host "Local config: $localConfigPath"
+        Write-Host "    Empty"
+    }
+    else {
+        Write-Host "Local config: $localConfigPath"
+        Write-Quote (ConvertTo-Yaml $localConfig)
+    }
+    Write-Host
+
+    Write-Host "User global config: $userGlobalConfigPath"
+    if (-not (Test-Path $userGlobalDataPath)) {
+        Write-Host "    Not found"
+    }
+    elseif ($null -eq $userGlobalConfig) {
+        Write-Host "    Empty file"
+    }
+    else {
+        Write-Quote (ConvertTo-Yaml $userGlobalConfig)
+    }
+    Write-Host
+
+    Write-Host "System global config: $systemGlobalConfigPath"
+    if (-not (Test-Path $systemGlobalDataPath)) {
+        Write-Host "    Not found"
+    }
+    elseif ($null -eq $systemGlobalConfig) {
+        Write-Host "    Empty file"
+    }
+    else {
+        Write-Quote (ConvertTo-Yaml $systemGlobalConfig)
+    }
+    Write-Host
+
+    Write-Host "Merged config:"
+    if ($null -eq $config) {
+        Write-Host "    Nothing"
+    }
+    else {
+        Write-Quote (ConvertTo-Yaml $config)
+    }
+}
+
 # Export
 
 Export-ModuleMember `
@@ -580,4 +654,5 @@ Export-ModuleMember `
         'Install-Cabal', `
         'Uninstall-Cabal', `
         'Show-Cabal', `
-        'Write-GhcupsConfigTemplate'
+        'Write-GhcupsConfigTemplate', `
+        'Show-GhcupsConfig'
