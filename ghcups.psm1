@@ -110,8 +110,10 @@ function Join-Hashtables {
         }
         foreach ($key in $h.Keys) {
             $value = $h[$key]
-            if ($result.ContainsKey($key) -and $result -is [Hashtable] -and $value -is [Hashtable]) {
-                [void] (Join-Hashtables $result[$key], $value -Breaking)
+            if ($result.ContainsKey($key)) {
+                if ($value -is [Hashtable]) {
+                    [void] (Join-Hashtables $result[$key], $value -Breaking)
+                }
             }
             else {
                 $result.Add($key, $h[$key])
