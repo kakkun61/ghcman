@@ -12,7 +12,7 @@
 RootModule = 'ghcups.psm1'
 
 # このモジュールのバージョン番号です。
-ModuleVersion = '3.0'
+ModuleVersion = '3.1'
 
 # サポートされている PSEditions
 # CompatiblePSEditions = @()
@@ -33,7 +33,7 @@ Copyright = '2019 IIJ Innovation Institute Inc.'
 Description = 'Switch GHC and Cabal quickly'
 
 # このモジュールに必要な Windows PowerShell エンジンの最小バージョン
-PowerShellVersion = '3.0'
+PowerShellVersion = '3.1'
 
 # このモジュールに必要な Windows PowerShell ホストの名前
 # PowerShellHostName = ''
@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = @('Haskell', 'GHC', 'PSEdition_Desktop', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/3.0/LICENSE'
+        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/3.1/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
         ProjectUri = 'https://github.com/kakkun61/ghcups'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.0/ChangeLog.md'
+        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.1/ChangeLog.md'
 
     } # PSData ハッシュテーブル終了
 

@@ -68,7 +68,7 @@ cabal:
 
 When you want to check the loaded configuration, use `Show-GhcupsConfig` function.
 
-You can specify the directory which GHCs and Cabals are installed at with _`$Env:GhcupsInstall`_. The default is _`$Env:APPDATA`\ghcups_.
+You can set _`$Env:GhcupsInstall`_ to specify the directory where GHCs and Cabals are installed. The default is _`$Env:APPDATA`\ghcups_.
 
 ## Functions
 

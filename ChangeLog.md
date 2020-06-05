@@ -1,5 +1,13 @@
 # Change log
 
+## 3.1
+
+`Show-*` returns objects. For humans, use the `-HumanReadable` option.
+
+A bug about configuration merging is fixed
+
+`Show-GhcupsConfig` is added.
+
 ## 3.0
 
 ### Breaking changes
