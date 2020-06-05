@@ -202,6 +202,26 @@ function Get-Architecture {
     return
 }
 
+function Write-StatusLine {
+    param (
+        [Parameter(Mandatory)][String] $Name,
+        [Parameter(Mandatory)][AllowNull()][AllowEmptyString()][String] $Path,
+        [Bool] $Supported = $false
+    )
+
+    Write-Host "$Name$(' ' * [Math]::Abs(8 - $Name.Length)) " -NoNewline
+    if ($Supported) {
+        Write-Host "S" -ForegroundColor DarkBlue -BackgroundColor White -NoNewline
+    }
+    else {
+        Write-Host " " -BackgroundColor White -NoNewline
+    }
+    if (-not ([String]::IsNullOrEmpty($Path))) {
+        Write-Host " $Path" -NoNewline
+    }
+    Write-Host
+}
+
 # GHC
 
 function Get-GhcupsGhc {
@@ -319,45 +339,62 @@ function Uninstall-Ghc {
 # .SYNOPSIS
 #   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
 function Show-Ghc {
+    param (
+        [Switch] $HumanReadable = $false
+    )
+
     $ErrorActionPreference = 'Stop'
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
-    $localConfigDir = $null
-    if (-not [String]::IsNullOrEmpty($localConfigPath)) {
-        $localConfigDir = Split-Path $localConfigPath -Parent
-    }
     $localConfig = Get-Config $localConfigPath
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $names = Get-HashtaleItem 'ghc' $config
-    if ($null -eq $names -or 0 -eq $names.Count) {
-        Write-Output 'No configurations found'
-    }
-    else {
-        Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
-        foreach ($k in $config.ghc.Keys) {
-            Write-Output "    ${k}:    $($config.ghc[$k])"
-        }
-    }
-    Write-Output ''
-    Write-Output 'Installed'
-    $versions = Get-InstalledItems 'ghc'
-    if ($null -eq $versions) {
-        Write-Output '    None'
-    }
-    else {
-        foreach ($v in $versions) {
-            Write-Output "    ${v}:$(' ' * (10 - $v.Length))$(Get-GhcupsInstall)\ghc-$v\bin"
-        }
-    }
-    Write-Output ''
-    Write-Output 'Supported (You can specify unsupported versions too)'
+    $paths = Get-HashtaleItem 'ghc' $config
+    $installeds = Get-InstalledItems 'ghc'
     $arch = Get-Architecture
-    $versions = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
-    foreach ($v in $versions) {
-        Write-Output "    ${v}"
+    $supporteds = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+
+    if ($HumanReadable) {
+        if ($null -ne $paths) {
+            foreach ($name in $paths.Keys) {
+                Write-StatusLine $name $paths[$name]
+            }
+        }
+        $result = @{}
+        foreach ($version in $installeds) {
+            $result.Add($version, @{ 'Supported' = $false; 'Path' = "$(Get-GhcupsInstall)\ghc-$version" })
+        }
+        foreach ($version in $supporteds) {
+            if ($null -eq $result[$version]) {
+                $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
+            }
+            else {
+                $result[$version]['Supported'] = $true
+            }
+        }
+        foreach ($version in $result.Keys | Where-Object { [Version]$_ } | Sort-Object -Descending | Where-Object { [String]$_ }) {
+            Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
+        }
+        Write-Output 'S: supported'
+        return
     }
+
+    $result = @{}
+    if ($null -ne $paths) {
+        foreach ($name in $paths.Keys) {
+            $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name] })
+        }
+    }
+    foreach ($version in $installeds) {
+        $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcupsInstall)\ghc-$version" })
+    }
+    foreach ($version in $supporteds) {
+        if ($null -eq $result[$version]) {
+            $result.Add($version, @{ 'Name' = $version })
+        }
+    }
+    $result
 }
 
 # Cabal
@@ -471,45 +508,62 @@ function Uninstall-Cabal {
 # .SYNOPSIS
 #   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not installed yet.
 function Show-Cabal {
+    param (
+        [Switch] $HumanReadable = $false
+    )
+
     $ErrorActionPreference = 'Stop'
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
-    $localConfigDir = $null
-    if (-not [String]::IsNullOrEmpty($localConfigPath)) {
-        $localConfigDir = Split-Path $localConfigPath -Parent
-    }
     $localConfig = Get-Config $localConfigPath
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $names = Get-HashtaleItem 'cabal' $config
-    if ($null -eq $names -or 0 -eq $names.Count) {
-        Write-Output 'No configurations found'
-    }
-    else {
-        Write-Output "$localConfigName ($(($localConfigDir, $userGlobalDataPath, $systemGlobalDataPath | Where-Object { $null -ne $_ }) -Join ', '))"
-        foreach ($k in $config.cabal.Keys) {
-            Write-Output "    ${k}:    $($config.cabal[$k])"
-        }
-    }
-    Write-Output ''
-    Write-Output 'Installed'
-    $versions = Get-InstalledItems 'cabal'
-    if ($null -eq $versions) {
-        Write-Output '    None'
-    }
-    else {
-        foreach ($v in $versions) {
-            Write-Output "    ${v}:$(' ' * (10 - $v.Length))$(Get-GhcupsInstall)\cabal-$v\bin"
-        }
-    }
-    Write-Output ''
-    Write-Output 'Supported (You can specify unsupported versions too)'
+    $paths = Get-HashtaleItem 'cabal' $config
+    $installeds = Get-InstalledItems 'cabal'
     $arch = Get-Architecture
-    $versions = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
-    foreach ($v in $versions) {
-        Write-Output "    ${v}"
+    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+
+    if ($HumanReadable) {
+        if ($null -ne $paths) {
+            foreach ($name in $paths.Keys) {
+                Write-StatusLine $name $paths[$name]
+            }
+        }
+        $result = @{}
+        foreach ($version in $installeds) {
+            $result.Add($version, @{ 'Supported' = $false; 'Path' = "$(Get-GhcupsInstall)\cabal-$version" })
+        }
+        foreach ($version in $supporteds) {
+            if ($null -eq $result[$version]) {
+                $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
+            }
+            else {
+                $result[$version]['Supported'] = $true
+            }
+        }
+        foreach ($version in $result.Keys | Where-Object { [Version]$_ } | Sort-Object -Descending | Where-Object { [String]$_ }) {
+            Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
+        }
+        Write-Output 'S: supported'
+        return
     }
+
+    $result = @{}
+    if ($null -ne $paths) {
+        foreach ($name in $paths.Keys) {
+            $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name] })
+        }
+    }
+    foreach ($version in $installeds) {
+        $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcupsInstall)\cabal-$version" })
+    }
+    foreach ($version in $supporteds) {
+        if ($null -eq $result[$version]) {
+            $result.Add($version, @{ 'Name' = $version })
+        }
+    }
+    $result
 }
 
 # Export
