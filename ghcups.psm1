@@ -386,7 +386,7 @@ function Show-Ghc {
                 $result[$version]['Supported'] = $true
             }
         }
-        foreach ($version in $result.Keys | Where-Object { [Version]$_ } | Sort-Object -Descending | Where-Object { [String]$_ }) {
+        foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
             Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
         }
         Write-Output 'S: supported'
@@ -555,7 +555,7 @@ function Show-Cabal {
                 $result[$version]['Supported'] = $true
             }
         }
-        foreach ($version in $result.Keys | Where-Object { [Version]$_ } | Sort-Object -Descending | Where-Object { [String]$_ }) {
+        foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
             Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
         }
         Write-Output 'S: supported'
