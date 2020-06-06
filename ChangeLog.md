@@ -1,5 +1,9 @@
 # Change log
 
+## 3.2
+
+The version sorting bug is fixed.
+
 ## 3.1
 
 `Show-*` returns objects. For humans, use the `-HumanReadable` option.
