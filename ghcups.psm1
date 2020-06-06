@@ -333,7 +333,7 @@ function Install-Ghc {
     7z x "-o$(Get-GhcupsInstall)" "$tempDir$fileName.tar"
 
     if ($Set) {
-        Set-Ghc -Ghc $Version
+        Set-Ghc -Name $Version
     }
 }
 
@@ -502,7 +502,7 @@ function Install-Cabal {
     Expand-Archive "$tempDir$fileName" "$(Get-GhcupsInstall)\cabal-$Version"
 
     if ($Set) {
-        Set-Cabal -Cabal $Version
+        Set-Cabal -Name $Version
     }
 }
 
