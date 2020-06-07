@@ -1,0 +1,22 @@
+name: install
+
+on: [push, pull_request]
+
+jobs:
+  test-powershell:
+    name: Install it on Windows
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        path: ghcups
+    - name: Install powershell-yaml
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module powershell-yaml -Force
+    - name: Install it
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module .\ghcups

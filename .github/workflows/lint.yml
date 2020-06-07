@@ -1,0 +1,21 @@
+name: lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Lint by PSScriptAnalyzer
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install PSScriptAnalyzer
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Install-Module PSScriptAnalyzer -Force
+    - name: Lint
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        Import-Module PSScriptAnalyzer
+        Invoke-ScriptAnalyzer . -Recurse -Severity Information -EnableExit
