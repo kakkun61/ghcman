@@ -4,7 +4,7 @@
 
 ## Dependency
 
-This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/files/7-Zip/).
+This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/files/7-Zip/). You must add the _7z_ to the `$Env:Path`.
 
 ## Install
 
