@@ -1,5 +1,13 @@
 # Change log
 
+## 3.3
+
+The `-Set` option error of `Install-*` is fixed.
+
+The unintentional bumping of the required PowerShell version is fixed.
+
+The error on `Install-Module` may be fixed.
+
 ## 3.2
 
 The version sorting bug is fixed.
