@@ -33,7 +33,7 @@ Copyright = '2019 IIJ Innovation Institute Inc.'
 Description = 'Switch GHC and Cabal quickly'
 
 # このモジュールに必要な Windows PowerShell エンジンの最小バージョン
-PowerShellVersion = '3.2'
+PowerShellVersion = '3.0'
 
 # このモジュールに必要な Windows PowerShell ホストの名前
 # PowerShellHostName = ''
