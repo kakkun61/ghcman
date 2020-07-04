@@ -109,7 +109,7 @@ PrivateData = @{
         # このモジュールの ReleaseNotes
         ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.4/ChangeLog.md'
 
-        ExternalModuleDependencies = @('Microsoft.PowerShell.Core', 'Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
+        ExternalModuleDependencies = @('Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
 
     } # PSData ハッシュテーブル終了
 
