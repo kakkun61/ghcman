@@ -51,7 +51,7 @@ PowerShellVersion = '3.0'
 # ProcessorArchitecture = ''
 
 # このモジュールをインポートする前にグローバル環境にインポートされている必要があるモジュール
-RequiredModules = @('powershell-yaml')
+RequiredModules = @('Microsoft.PowerShell.Archive', 'powershell-yaml')
 
 # このモジュールをインポートする前に読み込まれている必要があるアセンブリ
 # RequiredAssemblies = @()
@@ -108,6 +108,8 @@ PrivateData = @{
 
         # このモジュールの ReleaseNotes
         ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.3/ChangeLog.md'
+
+        ExternalModuleDependencies = @('Microsoft.PowerShell.Core', 'Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
 
     } # PSData ハッシュテーブル終了
 
