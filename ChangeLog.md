@@ -1,5 +1,9 @@
 # Change log
 
+## 3.4
+
+Add Microsoft.PowerShell.Archive, Microsoft.PowerShell.Management and Microsoft.PowerShell.Utility modules to required modules. #13
+
 ## 3.3
 
 The `-Set` option error of `Install-*` is fixed.
