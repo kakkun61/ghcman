@@ -1,5 +1,9 @@
 # Change log
 
+## 3.5
+
+Remove Microsoft.PowerShell.Core module from required modules.
+
 ## 3.4
 
 Add Microsoft.PowerShell.Archive, Microsoft.PowerShell.Management and Microsoft.PowerShell.Utility modules to required modules. #13
