@@ -1,6 +1,6 @@
 # ghcups; ghcup for PowerShell on Windows
 
-[![GitHub Actions: windows](https://github.com/kakkun61/ghcups/workflows/windows/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Awindows) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcups.svg)](https://www.powershellgallery.com/packages/ghcups/) [![Join the chat at https://gitter.im/ghcups/community](https://badges.gitter.im/ghcups/community.svg)](https://gitter.im/ghcups/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GitHub Actions: test](https://github.com/kakkun61/ghcups/workflows/test/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Atest) [![GitHub Actions: install](https://github.com/kakkun61/ghcups/workflows/install/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Ainstall) [![GitHub Actions: lint](https://github.com/kakkun61/ghcups/workflows/lint/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Alint) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcups.svg)](https://www.powershellgallery.com/packages/ghcups/) [![Join the chat at https://gitter.im/ghcups/community](https://badges.gitter.im/ghcups/community.svg)](https://gitter.im/ghcups/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Dependency
 
