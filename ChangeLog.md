@@ -1,5 +1,11 @@
 # Change log
 
+## 3.6
+
+*2020.07.18*
+
+Support 8.8.4.
+
 ## 3.5
 
 Remove Microsoft.PowerShell.Core module from required modules.
