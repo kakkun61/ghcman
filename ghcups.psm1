@@ -258,11 +258,17 @@ function Get-GhcPathPattern {
     [Regex]::Escape((Get-GhcupsInstall)) + '\\ghc-' + $versionPattern + '\\bin'
 }
 
+class GhcInstalledValidateSetValuesGenerator : System.Management.Automation.IValidateSetValuesGenerator {
+    [string[]] GetValidValues() {
+        return (Get-Ghc -OnlyInstalled).Keys
+    }
+}
+
 # .SYNOPSIS
 #   Sets the version or variant of GHC to the Path environment variable of the current session.
 function Set-Ghc {
     param (
-        [Parameter(Mandatory)][String] $Name
+        [Parameter(Mandatory)][ValidateSet([GhcInstalledValidateSetValuesGenerator])][String] $Name
     )
 
     $ErrorActionPreference = 'Stop'
@@ -359,8 +365,8 @@ function Uninstall-Ghc {
 
 # .SYNOPSIS
 #   [DEPRECATED] Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
-function Get-Ghc {
-    Write-Warning "Get-Ghc is deprecated, invoke Get-Ghc instead"
+function Show-Ghc {
+    Write-Warning "Show-Ghc is deprecated, invoke Get-Ghc instead"
     Get-Ghc
 }
 
@@ -464,11 +470,17 @@ function Get-CabalPathPattern {
     [Regex]::Escape((Get-GhcupsInstall)) + '\\cabal-' + $versionPattern
 }
 
+class CabalValidateSetValuesGenerator : System.Management.Automation.IValidateSetValuesGenerator {
+    [string[]] GetValidValues() {
+        return (Get-Cabal -OnlyInstalled).Keys
+    }
+}
+
 # .SYNOPSIS
 #   Sets the version or variant of Cabal to the Path environment variable of the current session.
 function Set-Cabal {
     param (
-        [Parameter(Mandatory)][String] $Name
+        [Parameter(Mandatory)][ValidateSet([CabalValidateSetValuesGenerator])][String] $Name
     )
 
     $ErrorActionPreference = 'Stop'
