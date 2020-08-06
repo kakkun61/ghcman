@@ -266,7 +266,7 @@ function Set-Ghc {
     $ghcDir = Get-HashtaleItem -Name 'ghc', $Name -Hashtable $cs
     if ([String]::IsNullOrEmpty($ghcDir)) {
         if ($Name -notmatch ('\A' + $versionPattern + '\Z')) {
-            Write-Error "No sutch GHC: $Name"
+            Write-Error "No such GHC: $Name"
             return
         }
         $ghcDir = Get-GhcupsGhc $Name
@@ -464,7 +464,7 @@ function Set-Cabal {
     $cabalDir = Get-HashtaleItem -Name 'cabal', $Name -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
     if ([String]::IsNullOrEmpty($cabalDir)) {
         if ($Name -notmatch ('\A' + $versionPattern + '\Z')) {
-            Write-Error "No sutch Cabal: $Name"
+            Write-Error "No such Cabal: $Name"
             return
         }
         $cabalDir = Get-GhcupsCabal $Name
