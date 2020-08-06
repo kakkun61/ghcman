@@ -385,7 +385,7 @@ function Show-Ghc {
                 $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
             }
             else {
-                $result[$version]['Supported'] = $true
+                $result[$version].Supported = $true
             }
         }
         foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
@@ -411,13 +411,13 @@ function Show-Ghc {
             $result.Add($version, @{ 'Name' = $version; 'Supported' = $true })
         }
         else {
-            $result[$version]['Supported'] = $true
+            $result[$version].Supported = $true
         }
     }
     if ($OnlySupported) {
         $result_ = @{}
         foreach ($version in $result.Keys) {
-            if ($result[$version]['Supported']) {
+            if ($result[$version].Supported) {
                 $result_.Add($version, $result[$version])
             }
         }
@@ -426,7 +426,7 @@ function Show-Ghc {
     if ($OnlyInstalled) {
         $result_ = @{}
         foreach ($version in $result.Keys) {
-            if (-not [String]::IsNullOrEmpty($result[$version]['Path'])) {
+            if (-not [String]::IsNullOrEmpty($result[$version].Path)) {
                 $result_.Add($version, $result[$version])
             }
         }
@@ -579,7 +579,7 @@ function Show-Cabal {
                 $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
             }
             else {
-                $result[$version]['Supported'] = $true
+                $result[$version].Supported = $true
             }
         }
         foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
@@ -605,13 +605,13 @@ function Show-Cabal {
             $result.Add($version, @{ 'Name' = $version; 'Supported' = $true })
         }
         else {
-            $result[$version]['Supported'] = $true
+            $result[$version].Supported = $true
         }
     }
     if ($OnlySupported) {
         $result_ = @{}
         foreach ($version in $result.Keys) {
-            if ($result[$version]['Supported']) {
+            if ($result[$version].Supported) {
                 $result_.Add($version, $result[$version])
             }
         }
@@ -620,7 +620,7 @@ function Show-Cabal {
     if ($OnlyInstalled) {
         $result_ = @{}
         foreach ($version in $result.Keys) {
-            if (-not [String]::IsNullOrEmpty($result[$version]['Path'])) {
+            if (-not [String]::IsNullOrEmpty($result[$version].Path)) {
                 $result_.Add($version, $result[$version])
             }
         }
