@@ -400,15 +400,15 @@ function Show-Ghc {
     $result = @{}
     if ($null -ne $paths) {
         foreach ($name in $paths.Keys) {
-            $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name] })
+            $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name]; 'Supported' = $false })
         }
     }
     foreach ($version in $installeds) {
-        $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcupsInstall)\ghc-$version" })
+        $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcupsInstall)\ghc-$version"; 'Supported' = $false })
     }
     foreach ($version in $supporteds) {
         if ($null -eq $result[$version]) {
-            $result.Add($version, @{ 'Name' = $version; 'Supported' = $true })
+            $result.Add($version, @{ 'Name' = $version; 'Path' = $null; 'Supported' = $true })
         }
         else {
             $result[$version].Supported = $true
@@ -594,15 +594,15 @@ function Show-Cabal {
     $result = @{}
     if ($null -ne $paths) {
         foreach ($name in $paths.Keys) {
-            $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name] })
+            $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name]; 'Supported' = $false })
         }
     }
     foreach ($version in $installeds) {
-        $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcupsInstall)\cabal-$version" })
+        $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcupsInstall)\cabal-$version"; 'Supported' = $false })
     }
     foreach ($version in $supporteds) {
         if ($null -eq $result[$version]) {
-            $result.Add($version, @{ 'Name' = $version; 'Supported' = $true })
+            $result.Add($version, @{ 'Name' = $version; 'Path' = $null; 'Supported' = $true })
         }
         else {
             $result[$version].Supported = $true
