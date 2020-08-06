@@ -350,8 +350,15 @@ function Uninstall-Ghc {
 }
 
 # .SYNOPSIS
-#   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
-function Show-Ghc {
+#   [DEPRECATED] Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
+function Get-Ghc {
+    Write-Warning "Get-Ghc is deprecated, invoke Get-Ghc instead"
+    Get-Ghc
+}
+
+# .SYNOPSIS
+#   Gets the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
+function Get-Ghc {
     param (
         [Switch] $HumanReadable = $false,
         [Switch] $OnlySupported = $false,
@@ -543,9 +550,17 @@ function Uninstall-Cabal {
     Remove-Item -Recurse -Force "$(Get-GhcupsInstall)\cabal-$Version"
 }
 
+
 # .SYNOPSIS
-#   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not installed yet.
+#   [DEPRECATED] Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not installed yet.
 function Show-Cabal {
+    Write-Warning "Show-Cabal is deprecated, invoke Get-Cabal instead"
+    Get-Cabal
+}
+
+# .SYNOPSIS
+#   Gets the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not installed yet.
+function Get-Cabal {
     param (
         [Switch] $HumanReadable = $false,
         [Switch] $OnlySupported = $false,
@@ -630,8 +645,14 @@ function Show-Cabal {
 }
 
 # .SYNOPSIS
-#   Shows the loaded configurations which are re-generated to YAML.
+#   [DEPRECATED] Shows the loaded configurations which are re-generated to YAML.
 function Show-GhcupsConfig {
+    Write-Warning "Show-GhcupsConfig is deprecated, Get-GhcupsConfig instead"
+}
+
+# .SYNOPSIS
+#   Gets the loaded configurations which are re-generated to YAML.
+function Get-GhcupsConfig {
     $ErrorActionPreference = 'Stop'
 
     $localConfigPath = Find-LocalConfigPath (Get-Location)
@@ -697,14 +718,17 @@ function Show-GhcupsConfig {
 Export-ModuleMember `
     -Function `
         'Set-Ghc', `
+        'Get-Ghc', `
         'Clear-Ghc', `
         'Install-Ghc', `
         'Uninstall-Ghc', `
         'Show-Ghc', `
         'Set-Cabal', `
+        'Get-Cabal', `
         'Clear-Cabal', `
         'Install-Cabal', `
         'Uninstall-Cabal', `
         'Show-Cabal', `
         'Write-GhcupsConfigTemplate', `
+        'Get-GhcupsConfig', `
         'Show-GhcupsConfig'

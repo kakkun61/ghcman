@@ -78,21 +78,21 @@ You can set _`$Env:GhcupsInstall`_ to specify the directory where GHCs and Cabal
   - Uninstalls the specified GHC.
 - `Set-Ghc`
   - Sets the version or variant of GHC to the Path environment variable of the current session.
+- `Get-Ghc`
+  - Gets the GHCs which are specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
 - `Clear-Ghc`
   - Removes all GHC values from the Path environment variable of the current session.
-- `Show-Ghc`
-  - Shows the GHCs which are specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed..
 - `Install-Cabal`
   - Installs the specified Cabal.
 - `Uninstall-Cabal`
   - Uninstalls the specified Cabal.
 - `Set-Cabal`
   - Sets the version or variant of Cabal to the Path environment variable of the current session.
+- `Get-Cabal`
+  - Gets the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
 - `Clear-Cabal`
   - Removes all Cabal values from the Path environment variable of the current session.
-- `Show-Cabal`
-  - Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed..
 - `Write-GhcupsConfigTemplate`
   - Creates the ghcups.yaml with the default contents.
-- `Show-GhcupsConfig`
-  - Shows the loaded configurations which are re-generated to YAML.
+- `Get-GhcupsConfig`
+  - Gets the loaded configurations which are re-generated to YAML.
