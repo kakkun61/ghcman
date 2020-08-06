@@ -353,7 +353,8 @@ function Uninstall-Ghc {
 #   Shows the GHCs which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not yet installed.
 function Show-Ghc {
     param (
-        [Switch] $HumanReadable = $false
+        [Switch] $HumanReadable = $false,
+        [Switch] $OnlySupported = $false
     )
 
     $ErrorActionPreference = 'Stop'
@@ -363,7 +364,7 @@ function Show-Ghc {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $paths = Get-HashtaleItem 'ghc' $config
+    $paths = if ($OnlySupported) { $null } else {Get-HashtaleItem 'ghc' $config }
     $installeds = Get-InstalledItems 'ghc'
     $arch = Get-Architecture
     $supporteds = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
@@ -387,6 +388,7 @@ function Show-Ghc {
             }
         }
         foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
+            if ($OnlySupported -and -not ($result[$version].Supported)) { continue }
             Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
         }
         Write-Output 'S: supported'
@@ -409,6 +411,15 @@ function Show-Ghc {
         else {
             $result[$version]['Supported'] = $true
         }
+    }
+    if ($OnlySupported) {
+        $result_ = @{}
+        foreach ($version in $result.Keys) {
+            if ($result[$version]['Supported']) {
+                $result_.Add($version, $result[$version])
+            }
+        }
+        $result = $result_
     }
     $result
 }
@@ -525,7 +536,8 @@ function Uninstall-Cabal {
 #   Shows the Cabals which is specified by the ghcups.yaml and config.yaml, which is installed by the Ghcups and which is not installed yet.
 function Show-Cabal {
     param (
-        [Switch] $HumanReadable = $false
+        [Switch] $HumanReadable = $false,
+        [Switch] $OnlySupported = $false
     )
 
     $ErrorActionPreference = 'Stop'
@@ -535,7 +547,7 @@ function Show-Cabal {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $paths = Get-HashtaleItem 'cabal' $config
+    $paths = if ($OnlySupported) { $null } else {Get-HashtaleItem 'cabal' $config }
     $installeds = Get-InstalledItems 'cabal'
     $arch = Get-Architecture
     $supporteds = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
@@ -559,6 +571,7 @@ function Show-Cabal {
             }
         }
         foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
+            if ($OnlySupported -and -not ($result[$version].Supported)) { continue }
             Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
         }
         Write-Output 'S: supported'
@@ -581,6 +594,15 @@ function Show-Cabal {
         else {
             $result[$version]['Supported'] = $true
         }
+    }
+    if ($OnlySupported) {
+        $result_ = @{}
+        foreach ($version in $result.Keys) {
+            if ($result[$version]['Supported']) {
+                $result_.Add($version, $result[$version])
+            }
+        }
+        $result = $result_
     }
     $result
 }
