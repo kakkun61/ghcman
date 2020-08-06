@@ -354,7 +354,8 @@ function Uninstall-Ghc {
 function Show-Ghc {
     param (
         [Switch] $HumanReadable = $false,
-        [Switch] $OnlySupported = $false
+        [Switch] $OnlySupported = $false,
+        [Switch] $OnlyInstalled = $false
     )
 
     $ErrorActionPreference = 'Stop'
@@ -389,6 +390,7 @@ function Show-Ghc {
         }
         foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
             if ($OnlySupported -and -not ($result[$version].Supported)) { continue }
+            if ($OnlyInstalled -and [String]::IsNullOrEmpty($result[$version].Path)) { continue }
             Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
         }
         Write-Output 'S: supported'
@@ -416,6 +418,15 @@ function Show-Ghc {
         $result_ = @{}
         foreach ($version in $result.Keys) {
             if ($result[$version]['Supported']) {
+                $result_.Add($version, $result[$version])
+            }
+        }
+        $result = $result_
+    }
+    if ($OnlyInstalled) {
+        $result_ = @{}
+        foreach ($version in $result.Keys) {
+            if (-not [String]::IsNullOrEmpty($result[$version]['Path'])) {
                 $result_.Add($version, $result[$version])
             }
         }
@@ -537,7 +548,8 @@ function Uninstall-Cabal {
 function Show-Cabal {
     param (
         [Switch] $HumanReadable = $false,
-        [Switch] $OnlySupported = $false
+        [Switch] $OnlySupported = $false,
+        [Switch] $OnlyInstalled = $false
     )
 
     $ErrorActionPreference = 'Stop'
@@ -572,6 +584,7 @@ function Show-Cabal {
         }
         foreach ($version in $result.Keys | ForEach-Object { [Version]$_ } | Sort-Object -Descending | ForEach-Object { [String]$_ }) {
             if ($OnlySupported -and -not ($result[$version].Supported)) { continue }
+            if ($OnlyInstalled -and [String]::IsNullOrEmpty($result[$version].Path)) { continue }
             Write-StatusLine $version $result[$version].Path -Supported $result[$version].Supported
         }
         Write-Output 'S: supported'
@@ -599,6 +612,15 @@ function Show-Cabal {
         $result_ = @{}
         foreach ($version in $result.Keys) {
             if ($result[$version]['Supported']) {
+                $result_.Add($version, $result[$version])
+            }
+        }
+        $result = $result_
+    }
+    if ($OnlyInstalled) {
+        $result_ = @{}
+        foreach ($version in $result.Keys) {
+            if (-not [String]::IsNullOrEmpty($result[$version]['Path'])) {
                 $result_.Add($version, $result[$version])
             }
         }
