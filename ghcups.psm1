@@ -404,7 +404,10 @@ function Show-Ghc {
     }
     foreach ($version in $supporteds) {
         if ($null -eq $result[$version]) {
-            $result.Add($version, @{ 'Name' = $version })
+            $result.Add($version, @{ 'Name' = $version; 'Supported' = $true })
+        }
+        else {
+            $result[$version]['Supported'] = $true
         }
     }
     $result
@@ -573,7 +576,10 @@ function Show-Cabal {
     }
     foreach ($version in $supporteds) {
         if ($null -eq $result[$version]) {
-            $result.Add($version, @{ 'Name' = $version })
+            $result.Add($version, @{ 'Name' = $version; 'Supported' = $true })
+        }
+        else {
+            $result[$version]['Supported'] = $true
         }
     }
     $result
