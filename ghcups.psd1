@@ -1,4 +1,4 @@
-#
+﻿#
 # モジュール 'ghcups' のモジュール マニフェスト
 #
 # 生成者: 岡本和樹
@@ -12,7 +12,7 @@
 RootModule = 'ghcups.psm1'
 
 # このモジュールのバージョン番号です。
-ModuleVersion = '3.6'
+ModuleVersion = '3.7'
 
 # サポートされている PSEditions
 # CompatiblePSEditions = @()
@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = @('Haskell', 'GHC', 'PSEdition_Desktop', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/3.6/LICENSE'
+        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/3.7/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
         ProjectUri = 'https://github.com/kakkun61/ghcups'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.6/ChangeLog.md'
+        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.7/ChangeLog.md'
 
         ExternalModuleDependencies = @('Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
 

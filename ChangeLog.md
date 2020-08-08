@@ -1,5 +1,13 @@
 # Change log
 
+## 3.7
+
+*2020.08.09*
+
+Support 8.10.2.
+`Show-Ghc` and `Show-Cabal` will be renamed to `Get-Ghc` and `Get-Cabal` respectively.
+`-OnlySupported` and `-OnlyInstalled` options are added to `Get-Ghc` and `Get-Cabal`.
+
 ## 3.6
 
 *2020.07.18*
