@@ -112,7 +112,13 @@ function Join-Hashtables {
             $value = $h[$key]
             if ($result.ContainsKey($key)) {
                 if ($value -is [Hashtable]) {
-                    [void] (Join-Hashtables $result[$key], $value -Breaking)
+                    if ($null -ne $result[$key]) {
+                        [void] (Join-Hashtables $result[$key], $value -Breaking)
+                    }
+                    else {
+                        $result.Remove($key)
+                        $result.Add($key, $h[$key])
+                    }
                 }
             }
             else {
