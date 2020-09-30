@@ -1,5 +1,11 @@
 # Change log
 
+## 3.8
+
+*2020.09.30*
+
+Fix an issue about configs merging.
+
 ## 3.7
 
 *2020.08.09*
