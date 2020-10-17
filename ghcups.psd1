@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # このモジュールに適用されているタグ。オンライン ギャラリーでモジュールを検出する際に役立ちます。
-        Tags = @('Haskell', 'GHC', 'PSEdition_Desktop', 'PSEdition_Core', 'Windows')
+        Tags = @('Haskell', 'GHC', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
         LicenseUri = 'https://github.com/kakkun61/ghcups/blob/3.8/LICENSE'
