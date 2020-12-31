@@ -1,5 +1,17 @@
 # Change log
 
+## 4.0
+
+*2020.12.31*
+
+### Breaking changes
+
+Remove PowerShell Desktop support.
+
+### Others
+
+Add tab completion for `Set-Ghc` and `Set-Cabal`.
+
 ## 3.9
 
 *2020.12.31*

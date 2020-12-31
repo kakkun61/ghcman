@@ -12,7 +12,7 @@
 RootModule = 'ghcups.psm1'
 
 # このモジュールのバージョン番号です。
-ModuleVersion = '3.9'
+ModuleVersion = '4.0'
 
 # サポートされている PSEditions
 # CompatiblePSEditions = @()
@@ -24,10 +24,10 @@ GUID = 'e5cd2573-d723-4600-abdb-e552c9d401d4'
 Author = 'Kazuki Okamoto (岡本和樹)'
 
 # このモジュールの会社またはベンダー
-CompanyName = 'IIJ Innovation Institute Inc.'
+CompanyName = ''
 
 # このモジュールの著作権情報
-Copyright = '2019 IIJ Innovation Institute Inc.'
+Copyright = '2020 Kazuki Okamoto (岡本和樹), 2019 IIJ Innovation Institute Inc.'
 
 # このモジュールの機能の説明
 Description = 'Switch GHC and Cabal quickly'
@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = @('Haskell', 'GHC', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/3.9/LICENSE'
+        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/4.0/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
         ProjectUri = 'https://github.com/kakkun61/ghcups'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/3.9/ChangeLog.md'
+        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/4.0/ChangeLog.md'
 
         ExternalModuleDependencies = @('Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
 
