@@ -346,6 +346,16 @@ function Install-Ghc {
     7z x "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
     7z x "-o$(Get-GhcupsInstall)" "$tempDir$fileName.tar"
 
+    $metas = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    foreach ($meta in $metas) {
+        if ($meta -eq $Version) {
+            break
+        }
+        if ($meta -is [hashtable] -and $meta['version'] -eq $Version) {
+            Move-Item -Path "$(Get-GhcupsInstall)\$($meta['directory'])" -Destination "$(Get-GhcupsInstall)\ghc-$($meta['version'])"
+        }
+    }
+
     if ($Set) {
         Set-Ghc -Name $Version
     }
@@ -402,6 +412,9 @@ function Get-Ghc {
             $result.Add($version, @{ 'Supported' = $false; 'Path' = "$(Get-GhcupsInstall)\ghc-$version" })
         }
         foreach ($version in $supporteds) {
+            if ($version -is [hashtable]) {
+                $version = $version['version']
+            }
             if ($null -eq $result[$version]) {
                 $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
             }
