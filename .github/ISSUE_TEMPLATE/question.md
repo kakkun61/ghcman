@@ -1,12 +1,12 @@
 ---
 name: Question
-about: Go to the Gitter for questions
+about: Go to the Gitter or Discussions for any questions
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-Ask questions on the Gitter! Go to https://gitter.im/ghcups/community.
+Ask any questions on the [Gitter](https://gitter.im/ghcups/community) or [GitHub Discussions](https://github.com/kakkun61/ghcups/discussions/)!
 
-Don't create issues for questions.
+Don't create any issues for any questions.
