@@ -37,6 +37,8 @@ ghc:
     - '8.0.1'
 cabal:
   x86_64:
+    - version: '3.4.0.0'
+      archive-file: cabal-install-3.4.0.0-x86_64-windows.zip
     - '3.2.0.0'
     - '3.0.0.0'
     - '2.4.1.0'

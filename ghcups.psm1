@@ -554,6 +554,18 @@ function Install-Cabal {
     $tempDir = [System.IO.Path]::GetTempPath()
     $arch = Get-Architecture
     $fileName = "cabal-install-$Version-$arch-unknown-mingw32.zip"
+
+    $metas = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    foreach ($meta in $metas) {
+        if ($meta -eq $Version) {
+            break
+        }
+        if ($meta -is [hashtable] -and $meta['version'] -eq $Version) {
+            $fileName = $meta['archive-file']
+            break
+        }
+    }
+
     if (Test-Path "$tempDir$fileName") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName"
         $choice = Read-Host "Do you want to use this? [y/N]"
@@ -608,10 +620,10 @@ function Get-Cabal {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $paths = if ($OnlySupported) { $null } else {Get-HashtaleItem 'cabal' $config }
+    $paths = if ($OnlySupported) { $null } else { Get-HashtaleItem 'cabal' $config }
     $installeds = Get-InstalledItems 'cabal'
     $arch = Get-Architecture
-    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml") | ForEach-Object { if ($_ -is [hashtable]) { $_['version'] } else { $_ } }
 
     if ($HumanReadable) {
         if ($null -ne $paths) {
