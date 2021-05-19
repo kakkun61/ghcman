@@ -2,6 +2,10 @@
 
 [![GitHub Actions: test](https://github.com/kakkun61/ghcups/workflows/test/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Atest) [![GitHub Actions: install](https://github.com/kakkun61/ghcups/workflows/install/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Ainstall) [![GitHub Actions: lint](https://github.com/kakkun61/ghcups/workflows/lint/badge.svg)](https://github.com/kakkun61/ghcups/actions?query=workflow%3Alint) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcups.svg)](https://www.powershellgallery.com/packages/ghcups/) [![Join the chat at https://gitter.im/ghcups/community](https://badges.gitter.im/ghcups/community.svg)](https://gitter.im/ghcups/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=GitHub)](https://github.com/sponsors/kakkun61)
 
+## ❗ Planned breaking changes
+
+I will rename “ghcups” to “**ghcman**” in a half years on November 2021 ([discussion](https://github.com/kakkun61/ghcups/discussions/16)).
+
 ## Dependency
 
 This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/files/7-Zip/). You must add the _7z_ to the `$Env:Path`.
