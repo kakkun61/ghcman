@@ -14,5 +14,5 @@ Task Publish {
     Publish-Module `
       -Name ..\ghcups `
       -NuGetApiKey (Get-Content .psg.key) `
-      -Exclude '.github\**', '.psg.key', 'Dockerfile'
+      -Exclude '.github\**', '.vscode\**', '.psg.key', 'debug.log', 'Dockerfile'
 }
