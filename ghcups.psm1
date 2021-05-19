@@ -352,7 +352,8 @@ function Install-Ghc {
             break
         }
         if ($meta -is [hashtable] -and $meta['version'] -eq $Version) {
-            Move-Item -Path "$(Get-GhcupsInstall)\$($meta['directory'])" -Destination "$(Get-GhcupsInstall)\ghc-$($meta['version'])"
+            Move-Item -Path "$(Get-GhcupsInstall)\$($meta['directory'])" -Destination "$(Get-GhcupsInstall)\ghc-$Version)"
+            break
         }
     }
 
