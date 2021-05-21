@@ -1,5 +1,11 @@
 # Change log
 
+## 4.4
+
+*2021.05.19*
+
+Fix a bug that `Install-Ghc` adds an unexpected “)”.
+
 ## 4.3
 
 *2021.05.19*
