@@ -12,7 +12,7 @@
 RootModule = 'ghcups.psm1'
 
 # このモジュールのバージョン番号です。
-ModuleVersion = '4.4'
+ModuleVersion = '4.5'
 
 # サポートされている PSEditions
 # CompatiblePSEditions = @()
@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = @('Haskell', 'GHC', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/4.4/LICENSE'
+        LicenseUri = 'https://github.com/kakkun61/ghcups/blob/4.5/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
         ProjectUri = 'https://github.com/kakkun61/ghcups'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/4.4/ChangeLog.md'
+        ReleaseNotes = 'https://github.com/kakkun61/ghcups/blob/4.5/ChangeLog.md'
 
         ExternalModuleDependencies = @('Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
 
