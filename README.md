@@ -8,7 +8,7 @@ I will rename “ghcups” to “**ghcman**” in a half years on November 2021 
 
 ## Dependency
 
-This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/files/7-Zip/). You must add the _7z_ to the `$Env:Path`.
+This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/). You must add the _7z_ to the `$Env:Path`.
 
 ## Install
 
