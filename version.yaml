@@ -2,6 +2,7 @@ ghc:
   x86_64:
     - version: '9.0.1'
       directory: ghc-9.0.1-x86_64-unknown-mingw32
+    - '8.10.6'
     - '8.10.5'
     - '8.10.4'
     - '8.10.3'
