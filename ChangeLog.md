@@ -1,5 +1,9 @@
 # Change log
 
+## Unreleased
+
+Support installing 7-Zip.
+
 ## 4.6
 
 *2021.08.19*

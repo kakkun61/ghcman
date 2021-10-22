@@ -9,6 +9,7 @@ Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcups"
 Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
 Set-Variable localConfigName -Option Constant -Value 'ghcups.yaml'
 Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
+Set-Variable default7ZipPath -Option Constant -Value 'C:\Program Files\7-Zip'
 
 # Common
 
@@ -243,6 +244,47 @@ function Write-Quote {
     }
 }
 
+function Start-7Zip {
+    try {
+        7z @Args
+    }
+    catch [System.Management.Automation.CommandNotFoundException] {
+        $originalException = $_.Exception
+        try {
+            & "$default7ZipPath\7z" @Args
+        }
+        catch [System.Management.Automation.CommandNotFoundException] {
+            $choice = Read-Host '"7z" is not found. Will you install 7-Zip? [y/N]'
+            if ('y' -ne $choice) {
+                throw $originalException
+            }
+            Install-7Zip
+            & "$default7ZipPath\7z" @Args
+        }
+    }
+}
+
+function Install-7Zip {
+    param ()
+
+    $tempDir = [System.IO.Path]::GetTempPath()
+    # https://www.7-zip.org/a/7z1900-x64.msi
+    $fileName = "7z1900-x64.msi"
+    if (Test-Path "$tempDir$fileName") {
+        Write-Host "A downloaded archive file is found: $tempDir$fileName"
+        $choice = Read-Host "Do you want to use this? [y/N]"
+        if ('y' -ne $choice) {
+            Remove-Item "$tempDir$fileName"
+            (New-Object System.Net.WebClient).DownloadFile("https://www.7-zip.org/a/$fileName", "$tempDir$fileName")
+        }
+    }
+    else {
+        (New-Object System.Net.WebClient).DownloadFile("https://www.7-zip.org/a/$fileName", "$tempDir$fileName")
+    }
+
+    Start-Process -FilePath 'msiexec' -ArgumentList "/i `"$tempDir$fileName`" /qn" -Wait -Verb RunAs
+}
+
 # GHC
 
 function Get-GhcupsGhc {
@@ -341,10 +383,10 @@ function Install-Ghc {
         (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
     }
     if (Test-Path "$tempDir$fileName.tar") {
-        Remove-Item "$tempDir$fileName.tar"
+        Remove-Item -Recurse "$tempDir$fileName.tar"
     }
-    7z x "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
-    7z x "-o$(Get-GhcupsInstall)" "$tempDir$fileName.tar"
+    Start-7Zip x -bso0 -bsp0 "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
+    Start-7Zip x -bso0 -bsp0 "-o$(Get-GhcupsInstall)" "$tempDir$fileName.tar"
 
     $metas = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
     foreach ($meta in $metas) {
