@@ -6,10 +6,6 @@
 
 I will rename “ghcups” to “**ghcman**” in a half years on November 2021 ([discussion](https://github.com/kakkun61/ghcman/discussions/16)).
 
-## Dependency
-
-This depends on the [7-Zip](https://sourceforge.net/projects/sevenzip/). You must add the _7z_ to the `$Env:Path`.
-
 ## Install
 
 Download and load ghcman to PowerShell.
