@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
       with:
-        path: ghcups
+        path: ghcman
     - name: Install powershell-yaml
       shell: pwsh
       run: |
@@ -19,4 +19,4 @@ jobs:
       shell: pwsh
       run: |
         $ErrorActionPreference = 'Stop'
-        Import-Module .\ghcups
+        Import-Module .\ghcman

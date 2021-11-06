@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+Rename.
+
 Support installing 7-Zip.
 
 Support downloading versions data file.
