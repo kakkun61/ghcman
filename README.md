@@ -100,3 +100,5 @@ You can set _`$Env:GhcmanInstall`_ to specify the directory where GHCs and Cabal
   - Creates the ghcman.yaml with the default contents.
 - `Get-GhcmanConfig`
   - Gets the loaded configurations which are re-generated to YAML.
+- `Update-GhcmanVersionFile`
+  - Download versions data.
