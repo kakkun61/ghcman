@@ -10,6 +10,8 @@ Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
 Set-Variable localConfigName -Option Constant -Value 'ghcups.yaml'
 Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 Set-Variable default7ZipPath -Option Constant -Value 'C:\Program Files\7-Zip'
+Set-Variable localAppData -Option Constant -Value "$Env:LOCALAPPDATA\ghcups"
+Set-Variable versionFile -Option Constant -Value "$localAppData\versions.yaml"
 
 # Common
 
@@ -285,6 +287,29 @@ function Install-7Zip {
     Start-Process -FilePath 'msiexec' -ArgumentList "/i `"$tempDir$fileName`" /qn" -Wait -Verb RunAs
 }
 
+# .SYNOPSIS
+#   Download versions data.
+function Update-GhcupsVersionFile() {
+    param ()
+
+    if (-not (Test-Path $localAppData)) {
+        New-Item -ItemType Directory -Path $localAppData
+    }
+    (Invoke-WebRequest https://raw.githubusercontent.com/kakkun61/ghcman/master/version.yaml).Content | Out-File $versionFile -NoClobber
+}
+
+function Get-GhcmanVersionFile {
+    param ()
+
+    if (Test-Path -PathType Leaf $versionFile) {
+        Write-Debug "A downloaded version file is found: $versionFile"
+        Get-Config $versionFile
+        return
+    }
+    Write-Debug "A downloaded version file is not found, a bundled one is used instead: $($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml"
+    Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml"
+}
+
 # GHC
 
 function Get-GhcupsGhc {
@@ -388,7 +413,7 @@ function Install-Ghc {
     Start-7Zip x -bso0 -bsp0 "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
     Start-7Zip x -bso0 -bsp0 "-o$(Get-GhcupsInstall)" "$tempDir$fileName.tar"
 
-    $metas = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    $metas = Get-HashtaleItem 'ghc', $arch (Get-GhcmanVersionFile)
     foreach ($meta in $metas) {
         if ($meta -eq $Version) {
             break
@@ -442,7 +467,7 @@ function Get-Ghc {
     $paths = if ($OnlySupported) { $null } else {Get-HashtaleItem 'ghc' $config }
     $installeds = Get-InstalledItems 'ghc'
     $arch = Get-Architecture
-    $supporteds = Get-HashtaleItem 'ghc', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    $supporteds = Get-HashtaleItem 'ghc', $arch (Get-GhcmanVersionFile)
 
     if ($HumanReadable) {
         if ($null -ne $paths) {
@@ -597,7 +622,7 @@ function Install-Cabal {
     $arch = Get-Architecture
     $fileName = "cabal-install-$Version-$arch-unknown-mingw32.zip"
 
-    $metas = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml")
+    $metas = Get-HashtaleItem 'cabal', $arch (Get-GhcmanVersionFile)
     foreach ($meta in $metas) {
         if ($meta -eq $Version) {
             break
@@ -665,7 +690,7 @@ function Get-Cabal {
     $paths = if ($OnlySupported) { $null } else { Get-HashtaleItem 'cabal' $config }
     $installeds = Get-InstalledItems 'cabal'
     $arch = Get-Architecture
-    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml") | ForEach-Object { if ($_ -is [hashtable]) { $_['version'] } else { $_ } }
+    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-GhcmanVersionFile) | ForEach-Object { if ($_ -is [hashtable]) { $_['version'] } else { $_ } }
 
     if ($HumanReadable) {
         if ($null -ne $paths) {
@@ -819,4 +844,5 @@ Export-ModuleMember `
         'Show-Cabal', `
         'Write-GhcupsConfigTemplate', `
         'Get-GhcupsConfig', `
-        'Show-GhcupsConfig'
+        'Show-GhcupsConfig', `
+        'Update-GhcupsVersionFile'

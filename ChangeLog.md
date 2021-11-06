@@ -4,6 +4,8 @@
 
 Support installing 7-Zip.
 
+Support downloading versions data file.
+
 ## 4.6
 
 *2021.08.19*
