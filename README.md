@@ -2,10 +2,6 @@
 
 [![GitHub Actions: test](https://github.com/kakkun61/ghcman/workflows/test/badge.svg)](https://github.com/kakkun61/ghcman/actions?query=workflow%3Atest) [![GitHub Actions: install](https://github.com/kakkun61/ghcman/workflows/install/badge.svg)](https://github.com/kakkun61/ghcman/actions?query=workflow%3Ainstall) [![GitHub Actions: lint](https://github.com/kakkun61/ghcman/workflows/lint/badge.svg)](https://github.com/kakkun61/ghcman/actions?query=workflow%3Alint) [![PowerShell Gallery](https://img.shields.io/powershellgallery/p/ghcman.svg)](https://www.powershellgallery.com/packages/ghcman/) [![Join the chat at https://gitter.im/ghcman/community](https://badges.gitter.im/ghcman/community.svg)](https://gitter.im/ghcman/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red?logo=GitHub)](https://github.com/sponsors/kakkun61)
 
-## ❗ Planned breaking changes
-
-I will rename “ghcups” to “**ghcman**” in a half years on November 2021 ([discussion](https://github.com/kakkun61/ghcman/discussions/16)).
-
 ## Install
 
 Download and load ghcman to PowerShell.
@@ -180,3 +176,7 @@ You can set _`$Env:GhcmanInstall`_ to specify a directory where GHCs and Cabals 
   - Gets the loaded configurations which are re-generated to YAML.
 - `Update-GhcmanVersionFile`
   - Download versions data.
+
+## Note
+
+Previously this was called “ghcups”.
