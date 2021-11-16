@@ -10,14 +10,14 @@ I will rename “ghcups” to “**ghcman**” in a half years on November 2021 
 
 Download and load ghcman to PowerShell.
 
-```
+```powershell
 > Install-Module ghcman
 > Import-Module ghcman
 ```
 
 Confirm its info.
 
-```
+```powershell
 > Get-Module ghcman
 
 ModuleType Version    Name     ExportedCommands
@@ -49,9 +49,81 @@ RELATED LINKS
 
 ```
 
+## How to use
+
+Retrieve new versions data.
+
+```powershell
+> Update-GhcmanVersionFile
+```
+
+Install a specified GHC and set it to `$Env:Path`.
+
+```powershell
+> Install-Ghc 9.2.1
+> Set-Ghc 9.2.1
+> ghc --version
+The Glorious Glasgow Haskell Compilation System, version 9.2.1
+```
+
+Install a specified Cabal and set it to `$Env:Path`.
+
+```powershell
+> Install-Cabal 3.4.0.0
+> Set-Cabal 3.4.0.0
+> cabal --version
+cabal-install version 3.4.0.0
+compiled using version 3.4.0.0 of the Cabal library
+```
+
+Check which versions are installed or not.
+
+```powershell
+> Get-Ghc -HumanReadable
+9.2.1    S C:\Users\kazuki\AppData\Roaming\ghcman\ghc-9.2.1
+9.0.1    S
+8.10.6   S
+8.10.5   S
+8.10.4   S
+8.10.3   S
+8.10.2   S
+8.10.1   S
+8.8.4    S
+8.8.3    S
+8.8.2    S
+8.8.1    S
+8.6.5    S
+8.6.4    S
+8.6.3    S
+8.6.2    S
+8.6.1    S
+8.4.4    S
+8.4.3    S
+8.4.2    S
+8.4.1    S
+8.2.2    S
+8.2.1    S
+8.0.2    S
+8.0.1    S
+S: supported
+```
+
+```powershell
+> Get-Cabal -HumanReadable
+3.4.0.0  S C:\Users\kazuki\AppData\Roaming\ghcman\cabal-3.4.0.0
+3.2.0.0  S
+3.0.0.0  S
+2.4.1.0  S
+2.4.0.0  S
+2.2.0.0  S
+2.0.0.1  S
+2.0.0.0  S
+S: supported
+```
+
 ## Configuration
 
-_ghcman.yaml_ is the local configuration file. ghcman searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_ or the root. The user global configuration file is _`$Env:APPDATA`\ghcman\config.yaml_, and the system global one is _`$Env:ProgramData`\ghcman\config.yaml_.
+_ghcman.yaml_ is a local configuration file. ghcman searches it in the current directory and its parents recursively until _`$Env:USERPROFILE`_ or the root. A user global configuration file is _`$Env:APPDATA`\ghcman\config.yaml_, and a system global one is _`$Env:ProgramData`\ghcman\config.yaml_.
 
 This is a sample of _ghcman.yaml_ and _config.yaml_.
 
@@ -66,9 +138,19 @@ cabal:
 
 `Write-GhcmanConfigTemplate` function creates _ghcman.yaml_ with the template.
 
-When you want to check the loaded configuration, use `Show-GhcmanConfig` function.
+When you want to check the loaded configuration, use `Get-GhcmanConfig` function.
 
-You can set _`$Env:GhcmanInstall`_ to specify the directory where GHCs and Cabals are installed. The default is _`$Env:APPDATA`\ghcman_.
+You can set _`$Env:GhcmanInstall`_ to specify a directory where GHCs and Cabals are installed. Its default is _`$Env:APPDATA`\ghcman_.
+
+- _.\ghcman.yaml_
+  - local configuration
+- _`$Env:APPDATA`\ghcman\config.yaml_
+  - user global configuration
+- _`$Env:ProgramData`\ghcman\config.yaml_
+  - system global configuration
+- _`$Env:GhcmanInstall`_
+  - installation directory
+  - default: _`$Env:APPDATA`\ghcman_
 
 ## Functions
 
