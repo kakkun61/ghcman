@@ -4,6 +4,7 @@ Set-StrictMode -Version Latest
 
 # Constant
 
+Set-Variable ghcmanVersion -Option Constant -Value [Version]"4.8"
 Set-Variable systemGlobalDataPath -Option Constant -Value "$Env:ProgramData\ghcman"
 Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcman"
 Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
@@ -11,7 +12,7 @@ Set-Variable localConfigName -Option Constant -Value 'ghcman.yaml'
 Set-Variable globalConfigName -Option Constant -Value 'config.yaml'
 Set-Variable default7ZipPath -Option Constant -Value 'C:\Program Files\7-Zip'
 Set-Variable localAppData -Option Constant -Value "$Env:LOCALAPPDATA\ghcman"
-Set-Variable versionFile -Option Constant -Value "$localAppData\versions.yaml"
+Set-Variable versionFile -Option Constant -Value "$localAppData\version.$ghcmanVersion.yaml"
 
 # Common
 
@@ -288,14 +289,14 @@ function Install-7Zip {
 }
 
 # .SYNOPSIS
-#   Download versions data.
+#   Download version data.
 function Update-GhcmanVersionFile() {
     param ()
 
     if (-not (Test-Path $localAppData)) {
         New-Item -ItemType Directory -Path $localAppData
     }
-    (Invoke-WebRequest https://raw.githubusercontent.com/kakkun61/ghcman/master/version.yaml).Content | Out-File $versionFile -NoClobber
+    (Invoke-WebRequest "https://raw.githubusercontent.com/kakkun61/ghcman/master/version.$ghcmanVersion.yaml").Content | Out-File $versionFile -NoClobber
 }
 
 function Get-GhcmanVersionFile {
@@ -306,8 +307,8 @@ function Get-GhcmanVersionFile {
         Get-Config $versionFile
         return
     }
-    Write-Debug "A downloaded version file is not found, a bundled one is used instead: $($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml"
-    Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.yaml"
+    Write-Debug "A downloaded version file is not found, a bundled one is used instead: $($MyInvocation.MyCommand.Module.ModuleBase)\version.$ghcmanVersion.yaml"
+    Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.$ghcmanVersion.yaml"
 }
 
 # GHC
@@ -413,15 +414,8 @@ function Install-Ghc {
     Start-7Zip x -bso0 -bsp0 "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
     Start-7Zip x -bso0 -bsp0 "-o$(Get-GhcmanInstall)" "$tempDir$fileName.tar"
 
-    $metas = Get-HashtaleItem 'ghc', $arch (Get-GhcmanVersionFile)
-    foreach ($meta in $metas) {
-        if ($meta -eq $Version) {
-            break
-        }
-        if ($meta -is [hashtable] -and $meta['version'] -eq $Version) {
-            Move-Item -Path "$(Get-GhcmanInstall)\$($meta['directory'])" -Destination "$(Get-GhcmanInstall)\ghc-$Version"
-            break
-        }
+    if ([Version]$Version -ge [Version]"9.0") {
+        Move-Item -Path "$(Get-GhcmanInstall)\ghc-$Version-x86_64-unknown-mingw32" -Destination "$(Get-GhcmanInstall)\ghc-$Version"
     }
 
     if ($Set) {
@@ -480,9 +474,6 @@ function Get-Ghc {
             $result.Add($version, @{ 'Supported' = $false; 'Path' = "$(Get-GhcmanInstall)\ghc-$version" })
         }
         foreach ($version in $supporteds) {
-            if ($version -is [hashtable]) {
-                $version = $version['version']
-            }
             if ($null -eq $result[$version]) {
                 $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
             }
@@ -621,16 +612,8 @@ function Install-Cabal {
     $tempDir = [System.IO.Path]::GetTempPath()
     $arch = Get-Architecture
     $fileName = "cabal-install-$Version-$arch-unknown-mingw32.zip"
-
-    $metas = Get-HashtaleItem 'cabal', $arch (Get-GhcmanVersionFile)
-    foreach ($meta in $metas) {
-        if ($meta -eq $Version) {
-            break
-        }
-        if ($meta -is [hashtable] -and $meta['version'] -eq $Version) {
-            $fileName = $meta['archive-file']
-            break
-        }
+    if ([Version]$Version -ge [Version]"3.4") {
+        $fileName = "cabal-install-$Version-$arch-windows.zip"
     }
 
     if (Test-Path "$tempDir$fileName") {
@@ -690,7 +673,7 @@ function Get-Cabal {
     $paths = if ($OnlySupported) { $null } else { Get-HashtaleItem 'cabal' $config }
     $installeds = Get-InstalledItems 'cabal'
     $arch = Get-Architecture
-    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-GhcmanVersionFile) | ForEach-Object { if ($_ -is [hashtable]) { $_['version'] } else { $_ } }
+    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-GhcmanVersionFile)
 
     if ($HumanReadable) {
         if ($null -ne $paths) {

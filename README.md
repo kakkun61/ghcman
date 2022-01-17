@@ -175,7 +175,7 @@ You can set _`$Env:GhcmanInstall`_ to specify a directory where GHCs and Cabals 
 - `Get-GhcmanConfig`
   - Gets the loaded configurations which are re-generated to YAML.
 - `Update-GhcmanVersionFile`
-  - Download versions data.
+  - Download version data.
 
 ## Note
 
