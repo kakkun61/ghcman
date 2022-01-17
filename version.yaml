@@ -2,8 +2,11 @@ ghc:
   x86_64:
     - version: '9.2.1'
       directory: ghc-9.2.1-x86_64-unknown-mingw32
+    - version: '9.0.2'
+      directory: ghc-9.0.2-x86_64-unknown-mingw32
     - version: '9.0.1'
       directory: ghc-9.0.1-x86_64-unknown-mingw32
+    - '8.10.7'
     - '8.10.6'
     - '8.10.5'
     - '8.10.4'
@@ -41,6 +44,12 @@ ghc:
     - '8.0.1'
 cabal:
   x86_64:
+    - version: '3.6.2.0'
+      archive-file: cabal-install-3.6.2.0-x86_64-windows.zip
+    - version: '3.6.0.0'
+      archive-file: cabal-install-3.6.0.0-x86_64-windows.zip
+    - version: '3.4.1.0'
+      archive-file: cabal-install-3.4.1.0-x86_64-windows.zip
     - version: '3.4.0.0'
       archive-file: cabal-install-3.4.0.0-x86_64-windows.zip
     - '3.2.0.0'
