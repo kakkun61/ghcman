@@ -1,5 +1,11 @@
 # Change log
 
+## 4.8
+
+*2022.01.17*
+
+Internal changes. New _version.yaml_ file and logic.
+
 ## 4.7
 
 *2021.11.06*
