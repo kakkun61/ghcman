@@ -12,7 +12,7 @@
 RootModule = 'ghcman.psm1'
 
 # このモジュールのバージョン番号です。
-ModuleVersion = '4.9'
+ModuleVersion = '4.10'
 
 # サポートされている PSEditions
 # CompatiblePSEditions = @()
@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = @('Haskell', 'GHC', 'PSEdition_Core', 'Windows')
 
         # このモジュールのライセンスの URL。
-        LicenseUri = 'https://github.com/kakkun61/ghcman/blob/4.9/LICENSE'
+        LicenseUri = 'https://github.com/kakkun61/ghcman/blob/4.10/LICENSE'
 
         # このプロジェクトのメイン Web サイトの URL。
         ProjectUri = 'https://github.com/kakkun61/ghcman'
@@ -107,7 +107,7 @@ PrivateData = @{
         # IconUri = ''
 
         # このモジュールの ReleaseNotes
-        ReleaseNotes = 'https://github.com/kakkun61/ghcman/blob/4.9/ChangeLog.md'
+        ReleaseNotes = 'https://github.com/kakkun61/ghcman/blob/4.10/ChangeLog.md'
 
         ExternalModuleDependencies = @('Microsoft.PowerShell.Management', 'Microsoft.PowerShell.Utility')
 

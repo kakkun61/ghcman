@@ -1,10 +1,16 @@
 # Change log
 
+## 4.10
+
+*2022.04.28*
+
+`Update-GhcmanVersionFile` overwrites a file.
+
 ## 4.9
 
 *2022.04.27*
 
-Bug fix.
+Bug fix #19.
 
 ## 4.8
 

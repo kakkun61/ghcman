@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 
 # Constant
 
-Set-Variable ghcmanVersion -Option Constant -Value "4.9"
+Set-Variable ghcmanVersion -Option Constant -Value "4.10"
 Set-Variable systemGlobalDataPath -Option Constant -Value "$Env:ProgramData\ghcman"
 Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcman"
 Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
