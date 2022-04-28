@@ -296,7 +296,7 @@ function Update-GhcmanVersionFile() {
     if (-not (Test-Path $localAppData)) {
         New-Item -ItemType Directory -Path $localAppData
     }
-    (Invoke-WebRequest "https://raw.githubusercontent.com/kakkun61/ghcman/master/version.$ghcmanVersion.yaml").Content | Out-File $versionFile -NoClobber
+    (Invoke-WebRequest "https://raw.githubusercontent.com/kakkun61/ghcman/master/version.$ghcmanVersion.yaml").Content | Out-File $versionFile -Force
 }
 
 function Get-GhcmanVersionFile {
