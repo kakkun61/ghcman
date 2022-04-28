@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 
 # Constant
 
-Set-Variable ghcmanVersion -Option Constant -Value "4.10"
+Set-Variable ghcmanVersion -Option Constant -Value ([Version]'4.10')
 Set-Variable systemGlobalDataPath -Option Constant -Value "$Env:ProgramData\ghcman"
 Set-Variable userGlobalDataPath -Option Constant -Value "$Env:APPDATA\ghcman"
 Set-Variable versionPattern -Option Constant -Value '[0-9]+(\.[0-9]+)*'
@@ -291,7 +291,9 @@ function Install-7Zip {
 # .SYNOPSIS
 #   Download version data.
 function Update-GhcmanVersionFile() {
-    param ()
+    param (
+        [Version] $Version = $ghcmanVersion
+    )
 
     if (-not (Test-Path $localAppData)) {
         New-Item -ItemType Directory -Path $localAppData
