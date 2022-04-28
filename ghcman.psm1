@@ -278,19 +278,21 @@ function Install-7Zip {
     $tempDir = [System.IO.Path]::GetTempPath()
     # https://www.7-zip.org/a/7z1900-x64.msi
     $fileName = "7z1900-x64.msi"
+    Write-Debug "Path to save: $tempDir$fileName"
     $url = "https://www.7-zip.org/a/$fileName"
     if (Test-Path "$tempDir$fileName") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName"
         $choice = Read-Host "Do you want to use this? [y/N]"
         if ('y' -ne $choice) {
+            Write-Debug "Removing $tempDir$fileName"
             Remove-Item "$tempDir$fileName"
             Write-Debug "Downloading $url to $tempDir$fileName"
-            (New-Object System.Net.WebClient).DownloadFile($url, "$tempDir$fileName")
+            Invoke-WebRequest $url -OutFile "$tempDir$fileName"
         }
     }
     else {
         Write-Debug "Downloading $url to $tempDir$fileName"
-        (New-Object System.Net.WebClient).DownloadFile($url, "$tempDir$fileName")
+        Invoke-WebRequest $url -OutFile "$tempDir$fileName"
     }
 
     Write-Debug "msiexec /i $tempDir$fileName /qn"
@@ -310,7 +312,7 @@ function Update-GhcmanVersionFile() {
     }
     $url = "https://raw.githubusercontent.com/kakkun61/ghcman/master/version.$version.yaml"
     Write-Debug "Downloading $url to $versionFile"
-    (Invoke-WebRequest $url).Content | Out-File $versionFile -Force
+    Invoke-WebRequest $url -OutFile $versionFile
 }
 
 function Get-GhcmanVersionFile {
@@ -413,19 +415,20 @@ function Install-Ghc {
     $arch = Get-Architecture
     $fileName = "ghc-$Version-$arch-unknown-mingw32"
     Write-Debug "Path to save: $tempDir$fileName.tar.xz"
+    $url = "https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz"
     if (Test-Path "$tempDir$fileName.tar.xz") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName.tar.xz"
         $choice = Read-Host "Do you want to use this? [y/N]"
         if ('y' -ne $choice) {
             Write-Debug "Removing $tempDir$fileName.tar.xz"
             Remove-Item "$tempDir$fileName.tar.xz"
-            Write-Debug "Downloading https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz to $tempDir$fileName.tar.xz"
-            (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
+            Write-Debug "Downloading $url to $tempDir$fileName.tar.xz"
+            Invoke-WebRequest $url -OutFile "$tempDir$fileName.tar.xz"
         }
     }
     else {
-        Write-Debug "Downloading https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz to $tempDir$fileName.tar.xz"
-        (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
+        Write-Debug "Downloading $url to $tempDir$fileName.tar.xz"
+        Invoke-WebRequest $url -OutFile "$tempDir$fileName.tar.xz"
     }
     if (Test-Path "$tempDir$fileName.tar") {
         Write-Debug "Removing $tempDir$fileName.tar"
@@ -639,16 +642,20 @@ function Install-Cabal {
         $fileName = "cabal-install-$Version-$arch-windows.zip"
     }
 
+    $url = "https://downloads.haskell.org/~cabal/cabal-install-$Version/$fileName"
     if (Test-Path "$tempDir$fileName") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName"
         $choice = Read-Host "Do you want to use this? [y/N]"
         if ('y' -ne $choice) {
+            Write-Debug "Removing $tempDir$fileName"
             Remove-Item "$tempDir$fileName"
-            (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~cabal/cabal-install-$Version/$fileName", "$tempDir$fileName")
+            Write-Debug "Downloading $url to $tempDir$fileName"
+            Invoke-WebRequest $url -OutFile "$tempDir$fileName"
         }
     }
     else {
-        (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~cabal/cabal-install-$Version/$fileName", "$tempDir$fileName")
+        Write-Debug "Downloading $url to $tempDir$fileName"
+        Invoke-WebRequest $url -OutFile "$tempDir$fileName"
     }
     Expand-Archive "$tempDir$fileName" "$(Get-GhcmanInstall)\cabal-$Version"
 
