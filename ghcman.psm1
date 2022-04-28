@@ -21,6 +21,7 @@ function Find-LocalConfigPath {
         [Parameter(Mandatory)][String] $Dir
     )
 
+    Write-Debug "Find-LocalConfigPath: $Dir"
     While ($true) {
         if ($Dir -eq $Env:USERPROFILE -or [String]::IsNullOrEmpty($Dir)) {
             ''
@@ -40,6 +41,7 @@ function Get-Config {
         [Parameter(Mandatory)][AllowNull()][AllowEmptyString()][String] $Path
     )
 
+    Write-Debug "Get-Config: $Path"
     if ([String]::IsNullOrEmpty($Path)) {
         $null
         return
@@ -148,6 +150,7 @@ function Set-PathEnv {
         [Parameter(Mandatory)][AllowEmptyString()][String] $path
     )
 
+    Write-Debug "Set-PathEnv: $patterns, $path"
     if (-not [String]::IsNullOrEmpty($path) -and -not (Test-Path $path)) {
         Write-Warning "`"$path`" is not an existing path"
     }
@@ -248,6 +251,7 @@ function Write-Quote {
 }
 
 function Start-7Zip {
+    Write-Debug "Start-7Zip: $Args"
     try {
         7z @Args
     }
@@ -270,21 +274,26 @@ function Start-7Zip {
 function Install-7Zip {
     param ()
 
+    Write-Debug "Install-7Zip"
     $tempDir = [System.IO.Path]::GetTempPath()
     # https://www.7-zip.org/a/7z1900-x64.msi
     $fileName = "7z1900-x64.msi"
+    $url = "https://www.7-zip.org/a/$fileName"
     if (Test-Path "$tempDir$fileName") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName"
         $choice = Read-Host "Do you want to use this? [y/N]"
         if ('y' -ne $choice) {
             Remove-Item "$tempDir$fileName"
-            (New-Object System.Net.WebClient).DownloadFile("https://www.7-zip.org/a/$fileName", "$tempDir$fileName")
+            Write-Debug "Downloading $url to $tempDir$fileName"
+            (New-Object System.Net.WebClient).DownloadFile($url, "$tempDir$fileName")
         }
     }
     else {
-        (New-Object System.Net.WebClient).DownloadFile("https://www.7-zip.org/a/$fileName", "$tempDir$fileName")
+        Write-Debug "Downloading $url to $tempDir$fileName"
+        (New-Object System.Net.WebClient).DownloadFile($url, "$tempDir$fileName")
     }
 
+    Write-Debug "msiexec /i $tempDir$fileName /qn"
     Start-Process -FilePath 'msiexec' -ArgumentList "/i `"$tempDir$fileName`" /qn" -Wait -Verb RunAs
 }
 
@@ -295,10 +304,13 @@ function Update-GhcmanVersionFile() {
         [Version] $Version = $ghcmanVersion
     )
 
+    Write-Debug "Update-GhcmanVersionFile: $Version"
     if (-not (Test-Path $localAppData)) {
         New-Item -ItemType Directory -Path $localAppData
     }
-    (Invoke-WebRequest "https://raw.githubusercontent.com/kakkun61/ghcman/master/version.$ghcmanVersion.yaml").Content | Out-File $versionFile -Force
+    $url = "https://raw.githubusercontent.com/kakkun61/ghcman/master/version.$version.yaml"
+    Write-Debug "Downloading $url to $versionFile"
+    (Invoke-WebRequest $url).Content | Out-File $versionFile -Force
 }
 
 function Get-GhcmanVersionFile {
@@ -309,7 +321,7 @@ function Get-GhcmanVersionFile {
         Get-Config $versionFile
         return
     }
-    Write-Debug "A downloaded version file is not found, a bundled one is used instead: $($MyInvocation.MyCommand.Module.ModuleBase)\version.$ghcmanVersion.yaml"
+    Write-Debug "A downloaded version file is not found, a bundled one is used instead: downloaded version file: $versionFile, bundled file: $($MyInvocation.MyCommand.Module.ModuleBase)\version.$ghcmanVersion.yaml"
     Get-Config "$($MyInvocation.MyCommand.Module.ModuleBase)\version.$ghcmanVersion.yaml"
 }
 
@@ -384,6 +396,7 @@ function Install-Ghc {
 
     $ErrorActionPreference = 'Stop'
 
+    Write-Debug "Install-Ghc: $Version"
     if (Test-Path "$(Get-GhcmanInstall)\ghc-$Version") {
         if ($Force) {
             Uninstall-Ghc $Version
@@ -399,28 +412,35 @@ function Install-Ghc {
     $tempDir = [System.IO.Path]::GetTempPath()
     $arch = Get-Architecture
     $fileName = "ghc-$Version-$arch-unknown-mingw32"
+    Write-Debug "Path to save: $tempDir$fileName.tar.xz"
     if (Test-Path "$tempDir$fileName.tar.xz") {
         Write-Host "A downloaded archive file is found: $tempDir$fileName.tar.xz"
         $choice = Read-Host "Do you want to use this? [y/N]"
         if ('y' -ne $choice) {
+            Write-Debug "Removing $tempDir$fileName.tar.xz"
             Remove-Item "$tempDir$fileName.tar.xz"
+            Write-Debug "Downloading https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz to $tempDir$fileName.tar.xz"
             (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
         }
     }
     else {
+        Write-Debug "Downloading https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz to $tempDir$fileName.tar.xz"
         (New-Object System.Net.WebClient).DownloadFile("https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz", "$tempDir$fileName.tar.xz")
     }
     if (Test-Path "$tempDir$fileName.tar") {
+        Write-Debug "Removing $tempDir$fileName.tar"
         Remove-Item -Recurse "$tempDir$fileName.tar"
     }
     Start-7Zip x -bso0 -bsp0 "-o$tempDir$fileName.tar" "$tempDir$fileName.tar.xz"
     Start-7Zip x -bso0 -bsp0 "-o$(Get-GhcmanInstall)" "$tempDir$fileName.tar"
 
     if ([Version]$Version -ge [Version]"9.0") {
+        Write-Debug "Moving $(Get-GhcmanInstall)\ghc-$Version-x86_64-unknown-mingw32 to $(Get-GhcmanInstall)\ghc-$Version"
         Move-Item -Path "$(Get-GhcmanInstall)\ghc-$Version-x86_64-unknown-mingw32" -Destination "$(Get-GhcmanInstall)\ghc-$Version"
     }
 
     if ($Set) {
+        Write-Debug "Setting GHC $Version"
         Set-Ghc -Name $Version
     }
 }
@@ -434,6 +454,7 @@ function Uninstall-Ghc {
 
     $ErrorActionPreference = 'Stop'
 
+    Write-Debug "Uninstall-Ghc: $Version"
     Remove-Item -Recurse -Force "$(Get-GhcmanInstall)\ghc-$Version"
 }
 
