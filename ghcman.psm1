@@ -417,8 +417,13 @@ function Install-Ghc {
     Write-Debug "Path to save: $tempDir$fileName.tar.xz"
     $url = "https://downloads.haskell.org/~ghc/$Version/$fileName.tar.xz"
     if (Test-Path "$tempDir$fileName.tar.xz") {
-        Write-Host "A downloaded archive file is found: $tempDir$fileName.tar.xz"
-        $choice = Read-Host "Do you want to use this? [y/N]"
+        if ($Force) {
+            $choice = 'n'
+        }
+        else {
+            Write-Host "A downloaded archive file is found: $tempDir$fileName.tar.xz"
+            $choice = Read-Host "Do you want to use this? [y/N]"
+        }
         if ('y' -ne $choice) {
             Write-Debug "Removing $tempDir$fileName.tar.xz"
             Remove-Item "$tempDir$fileName.tar.xz"
@@ -644,8 +649,13 @@ function Install-Cabal {
 
     $url = "https://downloads.haskell.org/~cabal/cabal-install-$Version/$fileName"
     if (Test-Path "$tempDir$fileName") {
-        Write-Host "A downloaded archive file is found: $tempDir$fileName"
-        $choice = Read-Host "Do you want to use this? [y/N]"
+        if ($Force) {
+            $choice = 'n'
+        }
+        else {
+            Write-Host "A downloaded archive file is found: $tempDir$fileName"
+            $choice = Read-Host "Do you want to use this? [y/N]"
+        }
         if ('y' -ne $choice) {
             Write-Debug "Removing $tempDir$fileName"
             Remove-Item "$tempDir$fileName"
