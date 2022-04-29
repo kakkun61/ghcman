@@ -2,7 +2,7 @@
 
 ## 4.10
 
-*2022.04.28*
+*2022.04.29*
 
 `Update-GhcmanVersionFile` overwrites a file.
 
