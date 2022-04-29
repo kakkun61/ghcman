@@ -6,3 +6,6 @@ trim_trailing_whitespace = true
 
 [.psg.key]
 insert_final_newline = false
+
+[.github/**]
+end_of_line = lf

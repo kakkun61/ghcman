@@ -19,4 +19,8 @@ jobs:
       shell: pwsh
       run: |
         $ErrorActionPreference = 'Stop'
+        $DebugPreference = 'Continue'
         Import-Module .\ghcman
+        Update-GhcmanVersionFile 4.10
+        Install-Ghc 9.2.1 -Force
+        Get-Ghc -HumanReadable
