@@ -10,6 +10,10 @@ Task Lint {
     Invoke-ScriptAnalyzer . -Recurse -Severity Information
 }
 
+Task Spell {
+    npm run spell
+}
+
 Task Publish {
     Publish-Module `
       -Name .\ghcman.psd1 `

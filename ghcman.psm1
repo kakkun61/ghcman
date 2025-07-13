@@ -53,7 +53,7 @@ function Get-Config {
     ConvertFrom-Yaml (Get-Content $Path -Raw)
 }
 
-function Get-HashtaleItem {
+function Get-HashtableItem {
     param (
         [Parameter(Mandatory)][Object[]] $Name,
         [Hashtable] $Hashtable
@@ -173,7 +173,7 @@ function Get-InstalledItems {
 }
 
 # .SYNOPSIS
-#   Creats the ghcman.yaml with the default contents.
+#   Creates the ghcman.yaml with the default contents.
 function Write-GhcmanConfigTemplate {
     param (
         [String] $Path = '.'
@@ -190,7 +190,7 @@ function Get-ExePathsFromConfigs {
 
     $patterns = `
       $Configs | `
-      ForEach-Object { Get-HashtaleItem $name $_ } | `
+      ForEach-Object { Get-HashtableItem $name $_ } | `
       Where-Object { $null -ne $_ } | `
       ForEach-Object -begin { [Diagnostics.CodeAnalysis.SuppressMessageAttribute('UseDeclaredVarsMoreThanAssignments', 'paths')] $paths = @() } -process { $paths += $_.Values } -end { $paths } | `
       Where-Object { -not [String]::IsNullOrEmpty($_) }
@@ -361,7 +361,7 @@ function Set-Ghc {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     [Hashtable] $cs = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $ghcDir = Get-HashtaleItem -Name 'ghc', $Name -Hashtable $cs
+    $ghcDir = Get-HashtableItem -Name 'ghc', $Name -Hashtable $cs
     if ([String]::IsNullOrEmpty($ghcDir)) {
         if ($Name -notmatch ('\A' + $versionPattern + '\Z')) {
             Write-Error "No such GHC: $Name"
@@ -489,10 +489,10 @@ function Get-Ghc {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $paths = if ($OnlySupported) { $null } else {Get-HashtaleItem 'ghc' $config }
-    $installeds = Get-InstalledItems 'ghc'
+    $paths = if ($OnlySupported) { $null } else {Get-HashtableItem 'ghc' $config }
+    $installedItems = Get-InstalledItems 'ghc'
     $arch = Get-Architecture
-    $supporteds = Get-HashtaleItem 'ghc', $arch (Get-GhcmanVersionFile)
+    $supportedItems = Get-HashtableItem 'ghc', $arch (Get-GhcmanVersionFile)
 
     if ($HumanReadable) {
         if ($null -ne $paths) {
@@ -501,10 +501,10 @@ function Get-Ghc {
             }
         }
         $result = @{}
-        foreach ($version in $installeds) {
+        foreach ($version in $installedItems) {
             $result.Add($version, @{ 'Supported' = $false; 'Path' = "$(Get-GhcmanInstall)\ghc-$version" })
         }
-        foreach ($version in $supporteds) {
+        foreach ($version in $supportedItems) {
             if ($null -eq $result[$version]) {
                 $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
             }
@@ -527,10 +527,10 @@ function Get-Ghc {
             $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name]; 'Supported' = $false })
         }
     }
-    foreach ($version in $installeds) {
+    foreach ($version in $installedItems) {
         $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcmanInstall)\ghc-$version"; 'Supported' = $false })
     }
-    foreach ($version in $supporteds) {
+    foreach ($version in $supportedItems) {
         if ($null -eq $result[$version]) {
             $result.Add($version, @{ 'Name' = $version; 'Path' = $null; 'Supported' = $true })
         }
@@ -591,7 +591,7 @@ function Set-Cabal {
     $localConfig = Get-Config (Find-LocalConfigPath (Get-Location))
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
-    $cabalDir = Get-HashtaleItem -Name 'cabal', $Name -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
+    $cabalDir = Get-HashtableItem -Name 'cabal', $Name -Hashtable (Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig)
     if ([String]::IsNullOrEmpty($cabalDir)) {
         if ($Name -notmatch ('\A' + $versionPattern + '\Z')) {
             Write-Error "No such Cabal: $Name"
@@ -710,10 +710,10 @@ function Get-Cabal {
     $userGlobalConfig = Get-Config (Join-Path $userGlobalDataPath $globalConfigName)
     $systemGlobalConfig = Get-Config (Join-Path $systemGlobalDataPath $globalConfigName)
     $config = Join-Hashtables $localConfig, $userGlobalConfig, $systemGlobalConfig
-    $paths = if ($OnlySupported) { $null } else { Get-HashtaleItem 'cabal' $config }
-    $installeds = Get-InstalledItems 'cabal'
+    $paths = if ($OnlySupported) { $null } else { Get-HashtableItem 'cabal' $config }
+    $installedItems = Get-InstalledItems 'cabal'
     $arch = Get-Architecture
-    $supporteds = Get-HashtaleItem 'cabal', $arch (Get-GhcmanVersionFile)
+    $supportedItems = Get-HashtableItem 'cabal', $arch (Get-GhcmanVersionFile)
 
     if ($HumanReadable) {
         if ($null -ne $paths) {
@@ -722,10 +722,10 @@ function Get-Cabal {
             }
         }
         $result = @{}
-        foreach ($version in $installeds) {
+        foreach ($version in $installedItems) {
             $result.Add($version, @{ 'Supported' = $false; 'Path' = "$(Get-GhcmanInstall)\cabal-$version" })
         }
-        foreach ($version in $supporteds) {
+        foreach ($version in $supportedItems) {
             if ($null -eq $result[$version]) {
                 $result.Add($version, @{ 'Supported' = $true; 'Path' = $null })
             }
@@ -748,10 +748,10 @@ function Get-Cabal {
             $result.Add($name, @{ 'Name' = $name; 'Path' = $paths[$name]; 'Supported' = $false })
         }
     }
-    foreach ($version in $installeds) {
+    foreach ($version in $installedItems) {
         $result.Add($version, @{ 'Name' = $version; 'Path' = "$(Get-GhcmanInstall)\cabal-$version"; 'Supported' = $false })
     }
-    foreach ($version in $supporteds) {
+    foreach ($version in $supportedItems) {
         if ($null -eq $result[$version]) {
             $result.Add($version, @{ 'Name' = $version; 'Path' = $null; 'Supported' = $true })
         }

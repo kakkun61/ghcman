@@ -1,0 +1,11 @@
+{
+  "name": "ghcman",
+  "version": "4.10.0",
+  "license": "MIT",
+  "scripts": {
+    "spell": "cspell lint ."
+  },
+  "dependencies": {
+    "cspell": "^9.1.3"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "words": [
+    "choco",
+    "ghci",
+    "ghcman",
+    "ghcup",
+    "ghcups",
+    "hashtable",
+    "hashtables",
+    "kazuki",
+    "msiexec",
+    "okamoto",
+    "pwsh",
+    "userprofile"
+  ],
+  "ignoreWords": [
+    "nghc",
+    "ncabal"
+  ]
+}
