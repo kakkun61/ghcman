@@ -7,7 +7,7 @@ jobs:
     name: Lint by PSScriptAnalyzer
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install PSScriptAnalyzer
       shell: pwsh
       run: |
