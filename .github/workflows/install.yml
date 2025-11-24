@@ -7,7 +7,7 @@ jobs:
     name: Install it on Windows
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         path: ghcman
     - name: Install powershell-yaml
