@@ -6,6 +6,6 @@
     "spell": "cspell lint ."
   },
   "dependencies": {
-    "cspell": "^9.7.0"
+    "cspell": "^10.0.1"
   }
 }
