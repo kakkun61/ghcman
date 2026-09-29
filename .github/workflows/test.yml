@@ -44,4 +44,4 @@ jobs:
       run: |
         $ErrorActionPreference = 'Stop'
         Import-Module Pester
-        Invoke-Pester -EnableExit
+        Invoke-Pester -CI
